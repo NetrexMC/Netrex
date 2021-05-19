@@ -29,6 +29,5 @@ export class RakConnection extends Connection {
 	public send(buffer: Uint8Array) {
 		throw new Error("Method not implemented.");
 	}
-	
 }
 export default RakConnection;
