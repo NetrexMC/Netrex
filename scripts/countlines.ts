@@ -6,28 +6,29 @@
  * ------------------------------------------------------------
  */
 import * as path from "https://deno.land/std@0.97.0/path/mod.ts";
+import { walkSync } from "https://deno.land/std@0.97.0/fs/walk.ts";
 
-export async function countlines(dir: string): Promise<[number, number]> {
+export function countlines(dir: string, iter: number = 0): [number, number] {
 	const toCount = path.resolve(Deno.cwd(), dir);
 	let currentWith = 0, current = 0;
 
+	if (iter >= 100) {
+		return [0,0];
+	}
+
 	try {
-		await Deno.stat(toCount);
-		for await (const file of Deno.readDir(toCount)) {
-			if (file.isDirectory) {
-				let countdir = await countlines(path.resolve(toCount, file.name));
-				current += countdir[0];
-				currentWith += countdir[1];
-			}
+		Deno.statSync(toCount);
+		for (const file of walkSync(toCount)) {
 			if (file.isFile) {
 				const p = path.resolve(toCount, file.name)
-				const contents = new TextDecoder().decode(Deno.readFileSync(p));
-				const countwo = contents.replace(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/igm, '').trim().split("\n").length;
+				const contents = new TextDecoder().decode(Deno.readFileSync(file.path));
+				const countwo = contents.replace(/\\"|"(?:\\"|[^"])*"|(\/\/.*|\/\*[\s\S]*?\*\/)/gm, '').trim().split("\n").length;
 				const countcm = contents.split('\n').length;
 				current += countwo;
 				currentWith += countcm;
 				console.log(`${p.replace(Deno.cwd(), '')} -> { %c${countwo.toLocaleString()}, %c${countcm.toLocaleString()}%c }`, "color: #58edef", "color: #f44949", "color: initial");
 			}
+			continue;
 		}
 	} catch (e) {
 		console.error(e);
