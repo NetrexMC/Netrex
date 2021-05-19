@@ -8,17 +8,15 @@
      </p>
 </div>
 
-### Why Netrex?
+## Why Netrex?
  - It's written in Typescript, and we are working on a closed rust fork with the same api so Netrex will be fast!
  - Unique and straight to the point.
  - Single Executable thanks to Deno.
  - Open Source
 
-### The Game Plan
+## The Game Plan
 
 We have a plan for the initial release! View it on our [projects page](https://github.com/NetrexMC/Netrex-den/projects/1)!
-
-
 
 ## Scripts
 All scripts can be accessed and viewed through the terminal by running `deno run -A ./scripts/mod.ts` in the home directory, or by installing them with deno. In this case, the name will be "netrexscript".
@@ -26,7 +24,7 @@ All scripts can be accessed and viewed through the terminal by running `deno run
 ### Install Netrex Scripts
 
 ```bash
-deno install -A https://raw.githubusercontent.com/NetrexMC/Netrex-den/master/scripts/mod.ts -n "netrexscript"
+deno install -A https://raw.githubusercontent.com/NetrexMC/Netrex-den/master/scripts/mod.ts -n "netrexscript" -f
 ```
 
 ### Count lines
