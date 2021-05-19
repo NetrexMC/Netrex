@@ -16,3 +16,33 @@
  *
  * © Netrex 2020 - 2021
  */
+import Connection from "./common/Connection.ts";
+
+export enum NetworkType {
+	RakNet,
+	DLTS,
+	WS,
+	UNKNOWN
+}
+
+export default abstract class NetworkServer {
+	/**
+	 * The Network type.
+	 */
+	public abstract serverType: NetworkType;
+
+	/**
+	 * Starts the Network Server
+	 */
+	public abstract start(): any;
+
+	/**
+	 * Stops the Network Server
+	 */
+	public abstract stop(): any;
+
+	/**
+	 * Gets the current connections
+	 */
+	public abstract get connections(): Connection[];
+}

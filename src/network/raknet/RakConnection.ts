@@ -16,3 +16,19 @@
  *
  * © Netrex 2020 - 2021
  */
+import Address from "../common/Address.ts";
+import Connection from "../common/Connection.ts";
+
+export class RakConnection extends Connection {
+	public get address(): Address {
+		throw new Error("Method not implemented.");
+	}
+	public terminate(reason: string) {
+		throw new Error("Method not implemented.");
+	}
+	public send(buffer: Uint8Array) {
+		throw new Error("Method not implemented.");
+	}
+	
+}
+export default RakConnection;

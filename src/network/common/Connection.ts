@@ -16,3 +16,21 @@
  *
  * © Netrex 2020 - 2021
  */
+import Address from "./Address.ts";
+
+export default abstract class Connection {
+	/**
+	 * The address of the current connection
+	 */
+	public abstract get address(): Address;
+
+	/**
+	 * Kill the connection for any given reason.
+	 */
+	public abstract terminate(reason: string): any;
+
+	/**
+	 * Sends any payload to the connection
+	 */
+	public abstract send(buffer: Uint8Array): any;
+}
