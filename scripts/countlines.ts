@@ -26,7 +26,7 @@ export function countlines(dir: string, iter: number = 0): [number, number] {
 				const countcm = contents.split('\n').length;
 				current += countwo;
 				currentWith += countcm;
-				console.log(`${p.replace(Deno.cwd(), '')} -> { %c${countwo.toLocaleString()}, %c${countcm.toLocaleString()}%c }`, "color: #58edef", "color: #f44949", "color: initial");
+				console.log(`${file.path.replace(Deno.cwd(), '')} -> { %c${countwo.toLocaleString()}, %c${countcm.toLocaleString()}%c }`, "color: #58edef", "color: #f44949", "color: initial");
 			}
 			continue;
 		}
