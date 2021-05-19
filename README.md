@@ -17,3 +17,31 @@
 ### The Game Plan
 
 We have a plan for the initial release! View it on our [projects page](https://github.com/NetrexMC/Netrex-den/projects/1)!
+
+
+
+## Scripts
+All scripts can be accessed and viewed through the terminal by running `deno run -A ./scripts/mod.ts` in the home directory, or by installing them with deno. In this case, the name will be "netrexscript".
+
+### Install Netrex Scripts
+
+```bash
+deno install -A https://raw.githubusercontent.com/NetrexMC/Netrex-den/master/scripts/mod.ts -n "netrexscript"
+```
+
+### Count lines
+
+A simple utility that recursively counts all lines in a given directory regardless of the file type (which will be changed later).
+
+```bash
+netrexscript count ./
+```
+
+### Apply Headers
+
+A simple utility that applies the netrex headers to all files within the given directory.
+
+```bash
+netrexscript headers ./
+```
+
