@@ -53,7 +53,11 @@ async function aph(dir: string): Promise<void> {
 				const fileRead = new TextDecoder().decode(Deno.readFileSync(ph));
 				const contents = applyHeader(fileRead);
 				await Deno.writeFile(ph, new TextEncoder().encode(contents));
-				console.log("Formatted: " + ph);
+				if (fileRead === contents) {
+					console.log("Skipped: " + ph);
+				} else {
+					console.log("Formatted: " + ph);
+				}
 			}
 		}
 	} catch (e) {
