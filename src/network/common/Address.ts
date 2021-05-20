@@ -1,10 +1,10 @@
 /**
- *  _   _      _
+ *  #   #      #
  * | \ | |    | |
- * |  \| | ___| |_ _ __ _____  __
- * | . ` |/ _ \ __| '__/ _ \ \/ /
- * | |\  |  __/ |_| | |  __/>  <
- * |_| \_|\___|\__|_|  \___/_/\_\
+ * |  \| | ###| |# # ## #####  ##
+ * | . ` |/ # \ ##| '##/ # \ \/ /
+ * | |\  |  ##/ |#| | |  ##/>  <
+ * |#| \#|\###|\##|#|  \###/#/\#\
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,9 +17,9 @@
  * © Netrex 2020 - 2021
  */
 class Address {
-	private _ip: string;
-	private _port: number;
-	private _version: 4 | 6;
+	#ip: string;
+	#port: number;
+	#version: 4 | 6;
 
 	/**
 	 * Get the Address instance from a Deno.NetAddr instance
@@ -34,30 +34,30 @@ class Address {
 	}
 
 	constructor(ip: string, port: number, version: 4|6 = 4) {
-		 this._ip = ip;
-		 this._port = port;
-		 this._version = version;
+		 this.#ip = ip;
+		 this.#port = port;
+		 this.#version = version;
 	}
 
 	/**
 	 * Gets the ip of the address
 	 */
 	public get ip(): string {
-		 return this._ip;
+		 return this.#ip;
 	}
 
 	/**
 	 * Gets the port of the address
 	 */
 	public get port(): number {
-		 return this._port;
+		 return this.#port;
 	}
 
 	/**
 	 * Gets the protocolversion for the address
 	 */
 	public get version(): number {
-		 return this._version;
+		 return this.#version;
 	}
 
 	/**
