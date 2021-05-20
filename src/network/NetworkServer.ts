@@ -34,7 +34,7 @@ export default abstract class NetworkServer {
 	/**
 	 * Starts the Network Server
 	 */
-	public abstract start(): any;
+	public abstract start(...args: any[]): any;
 
 	/**
 	 * Stops the Network Server
