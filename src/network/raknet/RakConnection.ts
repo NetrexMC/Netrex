@@ -17,17 +17,34 @@
  * © Netrex 2020 - 2021
  */
 import Address from "../common/Address.ts";
-import Connection from "../common/Connection.ts";
+import Connection, { ConnectionState } from "../common/Connection.ts";
+import { Stream } from "./util/Stream.ts";
 
 export class RakConnection extends Connection {
-	public get address(): Address {
-		throw new Error("Method not implemented.");
+	public state: ConnectionState;
+	public address: Address;
+
+	public constructor(address: Address) {
+		super();
+		this.state = ConnectionState.Disconnected;
+		this.address = address;
 	}
+
 	public terminate(reason: string) {
 		throw new Error("Method not implemented.");
 	}
 	public send(buffer: Uint8Array) {
 		throw new Error("Method not implemented.");
 	}
+
+	public recieve(buf: Stream) {
+		const rakId = buf.readByte();
+
+		if (this.state === ConnectionState.Disconnected) {
+			
+		}
+	}
+
+	public tick() {}
 }
 export default RakConnection;

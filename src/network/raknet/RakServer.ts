@@ -19,10 +19,12 @@
 import Address from "../common/Address.ts";
 import Connection from "../common/Connection.ts";
 import NetworkServer, { NetworkType } from "../NetworkServer.ts";
+import RakConnection from "./RakConnection.ts";
+import { Stream } from "./util/Stream.ts";
 
 export default class RakServer extends NetworkServer {
 	public serverType: NetworkType = NetworkType.RakNet;
-	#connects: Map<string, Connection> = new Map();
+	#connects: Map<string, RakConnection> = new Map();
 	#kill: boolean = false;
 	#socket?: Deno.DatagramConn;
 
@@ -35,12 +37,22 @@ export default class RakServer extends NetworkServer {
 		while (!this.#kill) {
 			try {
 				const request = await this.#socket.receive(new Uint8Array(2048));
-				const bytes = request[1];
+				const stream = new Stream(request[0]);
 				const origin = Address.from(request[1]);
 
-				if (this.#connects.has(origin.token)) {
-					// already connected
+				if (!this.#connects.has(origin.token)) {
+					const session = new RakConnection(origin);
+					this.#connects.set(origin.token, session);
 				}
+
+				const session = this.#connects.get(origin.token);
+
+				if (!session) {
+					// we can't handle this.
+					continue;
+				}
+
+				session.recieve(stream);
 			} catch {}
 		}
 
