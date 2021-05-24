@@ -16,8 +16,6 @@
  *
  * © Netrex 2020 - 2021
  */
-import {
-	BinaryStream as Stream
-} from 'https://raw.githubusercontent.com/RaptorsMC/BinaryUtils/master/mod.ts';
-export { Stream };
-// to do: Actual class here
+export default abstract class RakPacket {
+	public abstract readonly id: number;
+}

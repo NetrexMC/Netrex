@@ -16,8 +16,19 @@
  *
  * © Netrex 2020 - 2021
  */
-import {
-	BinaryStream as Stream
-} from 'https://raw.githubusercontent.com/RaptorsMC/BinaryUtils/master/mod.ts';
-export { Stream };
-// to do: Actual class here
+import { Stream } from "../../util/Stream.ts";
+
+export enum OfflinePacketIds {
+	UnconnectedPing = 0x01,
+	OpenConnectRequest = 0x05,
+	OpenConnectReply = 0x06,
+	SessionInfo = 0x07,
+	SessionInfoReply = 0x08,
+	UnconnectedPong = 0x1c
+}
+
+export abstract class OfflinePacket {
+	public abstract id: OfflinePacketIds;
+}
+
+export default OfflinePacket;
