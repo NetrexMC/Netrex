@@ -28,5 +28,25 @@ export enum IReliability {
 };
 
 export default class Reliability {
+	public static isReliable(r: number): boolean {
+		return (
+			r === IReliability.Reliable ||
+			r === IReliability.ReliableOrd ||
+			r === IReliability.ReliableOrdAck ||
+			r === IReliability.ReliableAck ||
+			r === IReliability.ReliableSeq
+		);
+	}
 
+	public static isSequenced(r: number): boolean {
+		return r === IReliability.ReliableSeq || r === IReliability.UnreliableSeq;
+	}
+
+	public static isOrdered(r: number): boolean {
+		return r === IReliability.ReliableOrd || r === IReliability.ReliableOrdAck;
+	}
+
+	public static isOrdOrSeq(r: number): boolean {
+		return this.isOrdered(r) || this.isSequenced(r);
+	}
 }

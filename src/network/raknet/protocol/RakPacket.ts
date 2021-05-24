@@ -16,6 +16,17 @@
  *
  * © Netrex 2020 - 2021
  */
+import { Stream } from "../util/Stream.ts";
+
+// This is for when TS decides to add static methods in interfaces.
+// export interface ServerBound {
+// 	static from(stream: Stream): any;
+// }
+
+export interface ClientBound {
+	encode(): Stream;
+}
+
 export default abstract class RakPacket {
 	public abstract readonly id: number;
 }

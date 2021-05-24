@@ -20,10 +20,13 @@ import Address from "../common/Address.ts";
 import Connection from "../common/Connection.ts";
 import NetworkServer, { NetworkType } from "../NetworkServer.ts";
 import RakConnection from "./RakConnection.ts";
+import MOTD from "./util/MOTD.ts";
 import { Stream } from "./util/Stream.ts";
 
 export default class RakServer extends NetworkServer {
+	public static uniqueId: bigint = BigInt(crypto.getRandomValues(new Uint8Array([0,0,0,0,0,0,0,0])).reduce((r, c) => r += c));
 	public serverType: NetworkType = NetworkType.RakNet;
+	public motd: MOTD = new MOTD();
 	#connects: Map<string, RakConnection> = new Map();
 	#kill: boolean = false;
 	#socket?: Deno.DatagramConn;
@@ -34,6 +37,11 @@ export default class RakServer extends NetworkServer {
 			port,
 			transport: 'udp'
 		});
+		this.motd.name = "Netrex Server";
+		this.motd.players.online = 0;
+		this.motd.players.max = 100;
+		this.motd.serverId = RakServer.uniqueId;
+
 		while (!this.#kill) {
 			try {
 				const request = await this.#socket.receive(new Uint8Array(2048));

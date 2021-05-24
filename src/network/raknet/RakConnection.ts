@@ -18,6 +18,7 @@
  */
 import Address from "../common/Address.ts";
 import Connection, { ConnectionState } from "../common/Connection.ts";
+import EncapsulatedPacket from "./protocol/EncapsulatedPacket.ts";
 import { Stream } from "./util/Stream.ts";
 
 export class RakConnection extends Connection {

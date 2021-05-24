@@ -54,9 +54,9 @@ async function aph(dir: string): Promise<void> {
 				const contents = applyHeader(fileRead);
 				await Deno.writeFile(ph, new TextEncoder().encode(contents));
 				if (fileRead === contents) {
-					console.log("Skipped: " + ph);
+					console.log("%c🚀 Skipped: %c" + ph, "color: #fce262", "color: initial;");
 				} else {
-					console.log("Formatted: " + ph);
+					console.log("%c✅ Formatted: %c" + ph, "color: #19ea3c", "color: initial;");
 				}
 			}
 		}

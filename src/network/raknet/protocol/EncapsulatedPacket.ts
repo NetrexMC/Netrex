@@ -18,6 +18,7 @@
  */
 import { Stream } from "../util/Stream.ts";
 import RakPacket from "./RakPacket.ts";
+import Reliability, { IReliability } from "./Reliability.ts";
 
 export enum PacketState {
 	Sent,
@@ -25,30 +26,55 @@ export enum PacketState {
 	Encapsulated
 }
 
-export interface PacketHeader {
-	peerConnected: boolean;
-	ack: boolean;
-	nak: boolean;
-	pair: boolean;
-	continuous: boolean;
-	bas: boolean;
+export interface FrameInstruction {
+	messageId?: number;
+	sequenceId?: number;
+	orderId?: number;
+	orderChan?: number;
 }
 
-export function getPacketHeader(byte: number): PacketHeader {
-	return {
-		peerConnected: (byte & 1 << 7) != 0,
-		ack: (byte & 1 << 6) != 0,
-		nak: (byte & 1 << 5) != 0,
-		pair: (byte & 1 << 4) != 0,
-		continuous: (byte & 1 << 3) != 0,
-		bas: (byte & 1 << 2) != 0
+export interface FragmentInformation {
+	size?: number;
+	id?: number;
+	index?: number;
+}
+
+// (https://wiki.vg/Raknet_Protocol#Frame_Set_Packet)
+export default class EncapsulatedPacket {
+	public reliability: IReliability = IReliability.Unreliable;
+	public state: PacketState = PacketState.Encapsulated;
+	public frameInstruction: FrameInstruction = {};
+	public fragmentInfo: FragmentInformation = {};
+	#buffer: Stream;
+
+	public constructor(stream: Stream) {
+		const flags = stream.readByte();
+		const length = Math.ceil(stream.readShort() / 8);
+		this.reliability = (flags & 224) >> 5;
+
+		if (Reliability.isReliable(this.reliability)) {
+			this.frameInstruction.messageId = stream.readLTriad();
+		}
+
+		if (Reliability.isSequenced(this.reliability)) {
+			this.frameInstruction.orderChan = stream.readLTriad();
+		}
+
+		if (Reliability.isOrdOrSeq(this.reliability)) {
+			this.frameInstruction.orderId = stream.readLTriad();
+			this.frameInstruction.orderChan = stream.readByte();
+		}
+
+		if ((flags & 0x10) > 0) {
+			this.fragmentInfo.size = stream.readInt();
+			this.fragmentInfo.id = stream.readShort();
+			this.fragmentInfo.index = stream.readInt();
+		}
+
+		this.#buffer = new Stream(stream.read(length));
 	}
-}
 
-export default abstract class EncapsulatedPacket {
-	public abstract readonly header: PacketHeader;
-	public abstract state: PacketState;
-	public get packets(): RakPacket[] {
-		return [];
+	public get buffer(): Stream {
+		return this.#buffer;
 	}
 }
