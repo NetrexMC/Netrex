@@ -5,63 +5,13 @@
  * Author: @Bavfalcon9
  * ------------------------------------------------------------
  */
-import { applyHeader } from "./applyheader.ts";
-import * as path from "https://deno.land/std@0.97.0/path/mod.ts";
-import { countlines } from "./countlines.ts";
+import { CommandHandler } from "./commands/Command.ts";
+import CountCommand from "./commands/CountCommand.ts";
+import HeaderCommand from "./commands/HeaderCommand.ts";
 
 if (import.meta.main) {
-	const args = Deno.args;
-	switch (args[0]?.toLowerCase()) {
-		case "count": {
-			countlinesf(args[1] ?? "./src");
-			break;
-		}
-		case "headers":
-		case "applyheaders":
-		case "aph": {
-			aph(args[1] ?? "./src");
-			break;
-		}
-		default:
-		case "help": {
-			console.log("Unknown Command \"" + (args[0] ?? "??") + "\".");
-			break;
-		}
-	}
-}
-
-function print(msg: string): void {
-
-}
-
-async function countlinesf(dir: string): Promise<void> {
-	let lines = await countlines(dir);
-	console.log(`\n-> Total Lines: %c${lines[0].toLocaleString()}%c\n-> Total lines without comments: %c${lines[1].toLocaleString()}`, "color: #58edef", "color: initial", "color: #f44949");
-}
-
-async function aph(dir: string): Promise<void> {
-	const toFix = path.resolve(Deno.cwd(), dir);
-
-	try {
-		await Deno.stat(toFix);
-		for await (const file of Deno.readDir(toFix)) {
-			if (file.isDirectory) {
-				await aph(path.resolve(toFix, file.name));
-			}
-			if (file.isFile) {
-				const ph = path.resolve(toFix, file.name)
-				const fileRead = new TextDecoder().decode(Deno.readFileSync(ph));
-				const contents = applyHeader(fileRead);
-				await Deno.writeFile(ph, new TextEncoder().encode(contents));
-				if (fileRead === contents) {
-					console.log("%c🚀 Skipped: %c" + ph, "color: #fce262", "color: initial;");
-				} else {
-					console.log("%c✅ Formatted: %c" + ph, "color: #19ea3c", "color: initial;");
-				}
-			}
-		}
-	} catch (e) {
-		console.error(e);
-		console.log("Unknown Directory given: " + toFix);
-	}
+	const handler = new CommandHandler();
+	handler.register(new CountCommand());
+	handler.register(new HeaderCommand());
+	handler.runMain();
 }
