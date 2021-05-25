@@ -40,7 +40,7 @@ export default class HeaderCommand extends Command {
 	}
 
 	public applyHeader(original: string): string {
-		const license = new ResourceFile('license').contents;
+		const license = atob("IF8gICBfICAgICAgXw0KfCBcIHwgfCAgICB8IHwNCnwgIFx8IHwgX19ffCB8XyBfIF9fIF9fX19fICBfXw0KfCAuIGAgfC8gXyBcIF9ffCAnX18vIF8gXCBcLyAvDQp8IHxcICB8ICBfXy8gfF98IHwgfCAgX18vPiAgPA0KfF98IFxffFxfX198XF9ffF98ICBcX19fL18vXF9cDQoNClRoaXMgcHJvZ3JhbSBpcyBmcmVlIHNvZnR3YXJlOiB5b3UgY2FuIHJlZGlzdHJpYnV0ZSBpdCBhbmQvb3IgbW9kaWZ5DQppdCB1bmRlciB0aGUgdGVybXMgb2YgdGhlIEdOVSBMZXNzZXIgR2VuZXJhbCBQdWJsaWMgTGljZW5zZSBhcyBwdWJsaXNoZWQgYnkNCnRoZSBGcmVlIFNvZnR3YXJlIEZvdW5kYXRpb24sIGVpdGhlciB2ZXJzaW9uIDMgb2YgdGhlIExpY2Vuc2UsIG9yDQooYXQgeW91ciBvcHRpb24pIGFueSBsYXRlciB2ZXJzaW9uLg0KDQpAYXV0aG9yIE5ldHJleCBUZWFtDQpAbGluayBodHRwczovL2dpdGh1Yi5jb20vTmV0cmV4TUMNCg0KwqkgTmV0cmV4IDIwMjAgLSAyMDIx");
 		const insertable = "/**\n" + license.split('\n').map(line => ((line.trim().length > 0) ? " * " + line : " *")).join('\n') + "\n */";
 
 		if (original.substr(0, 3) === '/**') {
