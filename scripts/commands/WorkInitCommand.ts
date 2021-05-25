@@ -15,12 +15,16 @@ export default class WorkInit extends Command {
 
 	public async execute(rel: string = "./") {
 		const p = path.resolve(Deno.cwd(), rel);
-		Deno.mkdirSync(path.resolve(p, './vscode'), {recursive: true});
-		Deno.writeFileSync(
-			path.resolve(p, './vscode/settings.json'),
-			new TextEncoder().encode(JSON.stringify(SETTINGS_JSON, null, 2))
-		);
-		console.log("Initialized workspace for vscode.")
+		try {
+			Deno.mkdirSync(path.resolve(p, './.vscode'), {recursive: true});
+			Deno.writeFileSync(
+				path.resolve(p, './.vscode/settings.json'),
+				new TextEncoder().encode(JSON.stringify(SETTINGS_JSON, null, 2))
+			);
+			console.log("Initialized workspace for vscode.")
+		} catch {
+			console.log("Workspace already initialized.");
+		}
 	}
 }
 const SETTINGS_JSON = {
