@@ -36,7 +36,8 @@ export enum NetworkEventType {
 export class NetworkServerEvents extends EventEmitter {
 	public on(packet: NetworkEventType.Disconnect, listener: (address: Address, reason: string) => any): this;
 	public on(packet: NetworkEventType.GamePacket, listener: (address: Address, buf: Uint8Array) => any): this;
-	public on(chan: NetworkEventType.GamePacket | NetworkEventType.Disconnect, listener: GenericFunction): this {
+	public on(packet: NetworkEventType.Query, listener: (address: Address, motd: any) => any): this;
+	public on(chan: string, listener: GenericFunction): this {
 		return super.on(chan, listener);
 	}
 }

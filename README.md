@@ -29,20 +29,3 @@ All scripts can be accessed and viewed through the terminal by running `deno run
 ```bash
 deno install -A -f -n netrexscript https://raw.githubusercontent.com/NetrexMC/Netrex-den/master/scripts/mod.ts
 ```
-
-### Count lines
-
-A simple utility that recursively counts all lines in a given directory regardless of the file type (which will be changed later).
-
-```bash
-netrexscript count ./
-```
-
-### Apply Headers
-
-A simple utility that applies the netrex headers to all files within the given directory.
-
-```bash
-netrexscript headers ./
-```
-
