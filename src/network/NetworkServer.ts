@@ -29,7 +29,8 @@ export enum NetworkType {
 
 export enum NetworkEventType {
 	GamePacket = "game_packet",
-	Disconnect = "client_disconnect"
+	Disconnect = "client_disconnect",
+	Query = "query_request"
 }
 
 export class NetworkServerEvents extends EventEmitter {
