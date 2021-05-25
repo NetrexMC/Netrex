@@ -17,7 +17,8 @@
  * © Netrex 2020 - 2021
  */
 import Connection from "./common/Connection.ts";
-import { EventEmitter } from "https://deno.land/std@0.97.0/node/events.ts";
+import { EventEmitter, GenericFunction } from "https://deno.land/std@0.97.0/node/events.ts";
+import Address from "./common/Address.ts";
 
 export enum NetworkType {
 	RakNet,
@@ -27,8 +28,16 @@ export enum NetworkType {
 }
 
 export enum NetworkEventType {
-	GamePacket = "packet_game",
-	Disconnect = "disconnect"
+	GamePacket = "game_packet",
+	Disconnect = "client_disconnect"
+}
+
+export class NetworkServerEvents extends EventEmitter {
+	public on(packet: NetworkEventType.Disconnect, listener: (address: Address, reason: string) => any): this;
+	public on(packet: NetworkEventType.GamePacket, listener: (address: Address, buf: Uint8Array) => any): this;
+	public on(chan: NetworkEventType.GamePacket | NetworkEventType.Disconnect, listener: GenericFunction): this {
+		return super.on(chan, listener);
+	}
 }
 
 export default abstract class NetworkServer {
@@ -40,7 +49,7 @@ export default abstract class NetworkServer {
 	/**
 	 * The events channel.
 	 */
-	public abstract channel: EventEmitter;
+	public abstract channel: NetworkServerEvents;
 
 	/**
 	 * Starts the Network Server

@@ -18,7 +18,7 @@
  */
 // import Address from "../common/Address.ts";
 // import Connection from "../common/Connection.ts";
-import NetworkServer, { NetworkEventType, NetworkType } from "../NetworkServer.ts";
+import NetworkServer, { NetworkEventType, NetworkServerEvents, NetworkType } from "../NetworkServer.ts";
 import {
 	BinaryStream as Stream
 } from 'https://raw.githubusercontent.com/RaptorsMC/BinaryUtils/master/mod.ts';
@@ -37,7 +37,7 @@ function rakadd2C(add: Address): CommonAddr {
 }
 export class RakServer extends NetworkServer {
 	public serverType: NetworkType = NetworkType.RakNet;
-	public channel: EventEmitter = new EventEmitter();
+	public channel: NetworkServerEvents = new NetworkServerEvents();
 	#listener: Listener = new Listener();
 
 	public constructor() {
@@ -46,7 +46,7 @@ export class RakServer extends NetworkServer {
 			this.channel.emit(NetworkEventType.GamePacket, rakadd2C(add), pk.buffer);
 		});
 		this.#listener.events.on('connectionDestroyed', (address: Address, reason: string) => {
-			this.channel.emit(NetworkEventType.Disconnect, rakadd2C(address));
+			this.channel.emit(NetworkEventType.Disconnect, rakadd2C(address), reason);
 	   	});
 	}
 
