@@ -17,6 +17,7 @@
  * © Netrex 2020 - 2021
  */
 import Connection from "./common/Connection.ts";
+import { EventEmitter } from "https://deno.land/std@0.97.0/node/events.ts";
 
 export enum NetworkType {
 	RakNet,
@@ -25,11 +26,21 @@ export enum NetworkType {
 	UNKNOWN
 }
 
+export enum NetworkEventType {
+	GamePacket = "packet_game",
+	Disconnect = "disconnect"
+}
+
 export default abstract class NetworkServer {
 	/**
 	 * The Network type.
 	 */
 	public abstract serverType: NetworkType;
+
+	/**
+	 * The events channel.
+	 */
+	public abstract channel: EventEmitter;
 
 	/**
 	 * Starts the Network Server
@@ -49,5 +60,5 @@ export default abstract class NetworkServer {
 	/**
 	 * Gets the current connections
 	 */
-	public abstract get connections(): Connection[];
+	public abstract get connections(): any;//Connection[];
 }
