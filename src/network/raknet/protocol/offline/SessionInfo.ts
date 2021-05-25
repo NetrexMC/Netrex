@@ -16,27 +16,18 @@
  *
  * © Netrex 2020 - 2021
  */
+import Address from "../../../common/Address.ts";
 import { Stream } from "../../util/Stream.ts";
 import { ServerBound } from "../RakPacket.ts";
 import OfflinePacket, { OfflinePacketIds } from "./OfflinePacket.ts";
 
-export default class OpenConnectRequest extends OfflinePacket implements ServerBound {
-	public id = OfflinePacketIds.OpenConnectRequest;
-	#protocol!: number;
-	#mtuSize!: number;
+export default class SessionInfo extends OfflinePacket implements ServerBound {
+	public id = OfflinePacketIds.SessionInfo;
+	public address!: Address;
+	public mtu!: number;
+	public clientId!: bigint;
 
-	public from(s: Stream): OpenConnectRequest {
-		s.read(16);
-		this.#protocol = s.readByte();
-		this.#mtuSize = s.buffer.byteLength + 1 + 28;
-		return this;
-	}
-
-	public get protocol(): number {
-		return this.#protocol || 10;
-	}
-
-	public get mtuSize(): number {
-		return this.#mtuSize || 1024;
+	public from(s: Stream) {
+		
 	}
 }

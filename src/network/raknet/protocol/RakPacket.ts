@@ -24,7 +24,11 @@ import { Stream } from "../util/Stream.ts";
 // }
 
 export interface ClientBound {
-	encode(): Stream;
+	parse(): Stream;
+}
+
+export interface ServerBound {
+	from(stream: Stream): any;
 }
 
 export default abstract class RakPacket {

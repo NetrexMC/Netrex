@@ -35,7 +35,7 @@ export class UnconnectedPong extends OfflinePacket implements ClientBound {
 		this.motd = motd;
 	}
 
-	public encode(): Stream {
+	public parse(): Stream {
 		const stream = new Stream();
 		stream.writeLong(this.time);
 		stream.writeLong(this.serverId);

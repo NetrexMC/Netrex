@@ -17,7 +17,6 @@
  * © Netrex 2020 - 2021
  */
 import { Stream } from "../util/Stream.ts";
-import RakPacket from "./RakPacket.ts";
 import Reliability, { IReliability } from "./Reliability.ts";
 
 export enum PacketState {
@@ -49,7 +48,7 @@ export default class EncapsulatedPacket {
 
 	public constructor(stream: Stream) {
 		const flags = stream.readByte();
-		const length = Math.ceil(stream.readShort() / 8);
+		const length = Math.ceil(stream.readUShort() / 8);
 		this.reliability = (flags & 224) >> 5;
 
 		if (Reliability.isReliable(this.reliability)) {
@@ -65,6 +64,8 @@ export default class EncapsulatedPacket {
 			this.frameInstruction.orderChan = stream.readByte();
 		}
 
+		// Frame is fragmented.
+		// to-do: Store known frames and send sorted and sequentially
 		if ((flags & 0x10) > 0) {
 			this.fragmentInfo.size = stream.readInt();
 			this.fragmentInfo.id = stream.readShort();

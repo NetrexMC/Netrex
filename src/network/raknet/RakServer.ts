@@ -49,7 +49,7 @@ export default class RakServer extends NetworkServer {
 				const origin = Address.from(request[1]);
 
 				if (!this.#connects.has(origin.token)) {
-					const session = new RakConnection(origin);
+					const session = new RakConnection(origin, this);
 					this.#connects.set(origin.token, session);
 				}
 
@@ -67,6 +67,10 @@ export default class RakServer extends NetworkServer {
 		for (let conn of this.connections) {
 			conn.terminate("NetworkServer shutdown.");
 		}
+	}
+
+	public send(address: Address, buffer: Uint8Array) {
+		this.#socket?.send(buffer, address.toDenoAddr());
 	}
 
 	public stop() {

@@ -42,6 +42,11 @@ export default abstract class NetworkServer {
 	public abstract stop(): any;
 
 	/**
+	 * Send a buffer to a specific client.
+	 */
+	public abstract send(...args: any[]): any;
+
+	/**
 	 * Gets the current connections
 	 */
 	public abstract get connections(): Connection[];

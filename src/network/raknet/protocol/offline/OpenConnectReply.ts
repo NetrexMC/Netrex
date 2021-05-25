@@ -16,27 +16,30 @@
  *
  * © Netrex 2020 - 2021
  */
+import { MAGIC } from "../../RakHandler.ts";
 import { Stream } from "../../util/Stream.ts";
-import { ServerBound } from "../RakPacket.ts";
+import { ClientBound } from "../RakPacket.ts";
 import OfflinePacket, { OfflinePacketIds } from "./OfflinePacket.ts";
 
-export default class OpenConnectRequest extends OfflinePacket implements ServerBound {
-	public id = OfflinePacketIds.OpenConnectRequest;
-	#protocol!: number;
-	#mtuSize!: number;
+export default class OpenConnectReply extends OfflinePacket implements ClientBound {
+	public id = OfflinePacketIds.OpenConnectReply;
+	public serverId: bigint;
+	public secure: boolean;
+	public mtu: number;
 
-	public from(s: Stream): OpenConnectRequest {
-		s.read(16);
-		this.#protocol = s.readByte();
-		this.#mtuSize = s.buffer.byteLength + 1 + 28;
-		return this;
+	public constructor(serverid: bigint, secure: boolean, mtu: number) {
+		super();
+		this.serverId = serverid;
+		this.secure = secure;
+		this.mtu = mtu;
 	}
 
-	public get protocol(): number {
-		return this.#protocol || 10;
-	}
-
-	public get mtuSize(): number {
-		return this.#mtuSize || 1024;
+	public parse(): Stream {
+		const stream = new Stream();
+		stream.append(MAGIC);
+		stream.writeLong(this.serverId);
+		stream.writeBool(this.secure);
+		stream.writeShort(this.mtu);
+		return stream;
 	}
 }
