@@ -24,7 +24,7 @@ export default class UpdateCommand extends Command {
 		}
 
 		const install = Deno.run({
-			cmd: "deno install -A -f -n netrexscript https://raw.githubusercontent.com/NetrexMC/Netrex-den/master/scripts/mod.ts".split(" "),
+			cmd: "deno install -A -f -n netrexscript https://raw.githubusercontent.com/NetrexMC/Netrex-deno/master/scripts/mod.ts".split(" "),
 			stdout: "piped"
 		})
 
