@@ -16,3 +16,14 @@
  *
  * © Netrex 2020 - 2021
  */
+export {
+	NetworkType,
+	NetworkEventType,
+	NetworkServerEvents,
+	default as NetworkServer
+} from "./network/NetworkServer.ts";
+export { default as Address } from './network/common/Address.ts';
+export {
+	ConnectionState,
+	default as Connection
+} from './network/common/Connection.ts';
