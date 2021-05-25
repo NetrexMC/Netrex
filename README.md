@@ -4,11 +4,14 @@
      </p>
      <p>
           <h1> Netrex </h1>
-          <p>A powerful minecraft bedrock software written in Typescript with Deno.</p>
+          <p>A powerful minecraft bedrock software written in Typescript with Deno. </p>
      </p>
 </div>
 
+[![Discord](https://img.shields.io/discord/846586369568800798.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/y4aWA5MQxK)
+
 ## Why Netrex?
+
  - It's written in Typescript.
  - Unique and straight to the point.
  - Single Executable thanks to Deno.
