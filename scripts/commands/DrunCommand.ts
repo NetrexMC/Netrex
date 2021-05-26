@@ -20,7 +20,7 @@ export default class DrunCommand extends Command {
 				stdout: "piped"
 			})
 		} catch (e) {
-			console.error(e.message);
+			console.error("Error! Your project should have an import map");
 		}
 	}
 }
