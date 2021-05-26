@@ -13,7 +13,7 @@ export default class UpdateCommand extends Command {
 	public async execute() {
 		console.log("Upgrading to latest...");
 		const cache = Deno.run({
-				cmd: ("deno cache --reload https://raw.githubusercontent.com/NetrexMC/Netrex/master/scripts/mod.ts").split(" "),
+				cmd: ("deno cache --reload --unstable https://raw.githubusercontent.com/NetrexMC/Netrex/master/scripts/mod.ts").split(" "),
 				stdout: "piped"
 		});
 
@@ -24,7 +24,7 @@ export default class UpdateCommand extends Command {
 		}
 
 		const install = Deno.run({
-			cmd: `deno install -A -f -n netrexscript https://raw.githubusercontent.com/NetrexMC/Netrex/master/scripts/mod.ts`.split(" "),
+			cmd: `deno install -A -f --unstable -n nsc https://raw.githubusercontent.com/NetrexMC/Netrex/master/scripts/mod.ts`.split(" "),
 			stdout: "piped"
 		})
 
