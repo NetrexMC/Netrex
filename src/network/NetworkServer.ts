@@ -42,7 +42,7 @@ export class NetworkServerEvents extends EventEmitter {
 	}
 }
 
-export default abstract class NetworkServer {
+export default abstract class NetworkServer<EventChannel = NetworkServerEvents> {
 	/**
 	 * The Network type.
 	 */
@@ -51,7 +51,7 @@ export default abstract class NetworkServer {
 	/**
 	 * The events channel.
 	 */
-	public abstract channel: NetworkServerEvents;
+	public abstract channel: EventChannel;
 
 	/**
 	 * Starts the Network Server
