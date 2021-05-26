@@ -7,7 +7,7 @@ export default class DrunCommand extends Command {
 		"denorun",
 	];
 	public description: string = "Runs the Netrex automatically project if provided an important map";
-	public usage: string = "{c} [path | mod.ts]";
+	public usage: string = "{c} [module = mod.ts]\n {c} ./index.ts\n {c} ./mod.ts\n {c}";
 
 	public async execute(file: string = 'mod.ts') {
 		try {
