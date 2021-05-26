@@ -6,7 +6,7 @@ export default class DrunCommand extends Command {
 	public aliases: string[] = [
 		"denorun",
 	];
-	public description: string = "Runs the Netrex automatically project if provided an important map";
+	public description: string = "Runs a project with a import map by the name of \"import_map.json\" with all flags and --unstable.";
 	public usage: string = "{c} [module = mod.ts]\n {c} ./index.ts\n {c} ./mod.ts\n {c}";
 
 	public async execute(file: string = 'mod.ts') {
@@ -16,7 +16,7 @@ export default class DrunCommand extends Command {
 				console.log("%cNo import map was found. Please add a valid import_map.json to your root directory", "color: #fce262");
 			});
 			Deno.run({
-				cmd: `deno run -A --import-map=import_map.json ${file}`.split(" "),
+				cmd: `deno run -A --unstable --import-map=import_map.json ${file}`.split(" "),
 				stdout: "piped"
 			})
 		} catch (e) {

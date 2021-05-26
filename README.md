@@ -27,5 +27,5 @@ All scripts can be accessed and viewed through the terminal by running `deno run
 ### Install Netrex Scripts
 
 ```bash
-deno install -A -f -n netrexscript https://raw.githubusercontent.com/NetrexMC/Netrex/master/scripts/mod.ts
+deno install -A -f -n nsc https://raw.githubusercontent.com/NetrexMC/Netrex/master/scripts/mod.ts
 ```
