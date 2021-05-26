@@ -27,3 +27,5 @@ export {
 	ConnectionState,
 	default as Connection
 } from './network/common/Connection.ts';
+
+console.log("test");

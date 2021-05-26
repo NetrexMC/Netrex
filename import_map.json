@@ -1,0 +1,6 @@
+{
+	"imports": {
+		"netrex": "https://raw.githubusercontent.com/NetrexMC/Netrex-deno/master/src/mod.ts",
+		"netrex/": "https://raw.githubusercontent.com/NetrexMC/Netrex-deno/master/src/"
+	}
+}
