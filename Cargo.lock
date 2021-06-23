@@ -3,3 +3,11 @@
 [[package]]
 name = "Netrex"
 version = "0.1.0"
+dependencies = [
+ "binary_utils",
+]
+
+[[package]]
+name = "binary_utils"
+version = "0.1.0"
+source = "git+https://github.com/NetrexMC/BinaryUtil#57f34e7119c468c20af807d981713b67c4322229"
