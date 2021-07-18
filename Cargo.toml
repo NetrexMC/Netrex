@@ -1,5 +1,5 @@
 [package]
-name = "Netrex"
+name = "netrex"
 version = "0.1.0"
 authors = ["Bavfalcon9"]
 edition = "2018"
@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 # Hard depend on binary_utils
 binary_utils = { git = "https://github.com/NetrexMC/BinaryUtil", branch = "master" }
+rakrs = { git = "https://github.com/NetrexMC/RakNet", branch = "master" }
