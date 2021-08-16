@@ -1,3 +1,4 @@
+pub mod util;
 use binary_utils::BinaryStream;
 
 pub trait ServerBound {

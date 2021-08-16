@@ -1,8 +1,9 @@
 pub mod packet;
 pub mod protocol;
-pub mod network_server;
+pub mod network;
 
 pub use self::{
-	network_server::*,
+	network::*,
 	protocol::compression
 };
+
