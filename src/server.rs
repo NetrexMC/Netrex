@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use rakrs::*;
 
 pub struct Server {
 	// players on the server
@@ -11,5 +12,9 @@ impl Server {
 		Self {
 			players: HashMap::new()
 		}
+	}
+
+	pub fn tick(raknet_server: RakNetServer) {
+		print!("Ticking...")
 	}
 }
