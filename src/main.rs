@@ -6,7 +6,7 @@ pub mod world;
 pub mod server;
 
 fn main() {
-    server::Server::initialize();
+	server::Server::initialize();
 	// TODO -> Do config stuff for this!
 	network::initialize(&"0.0.0.0:19132");
 
