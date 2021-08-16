@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use rakrs::*;
 use crate::logger::Logger;
 
 pub struct Server {
@@ -19,10 +18,11 @@ impl Server {
 		}
 	}
 
-	pub fn tick(raknet_server: RakNetServer) {
-	}
-
 	pub fn get_logger(&mut self) -> Logger {
 		self.logger.clone()
+	}
+
+	pub fn get_players(&mut self) -> HashMap<String, u8> {
+		self.players.clone()
 	}
 }
