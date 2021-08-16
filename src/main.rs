@@ -1,4 +1,5 @@
 pub mod network;
+pub mod logger;
 pub mod plugin;
 pub mod util;
 pub mod world;
