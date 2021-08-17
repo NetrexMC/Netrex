@@ -1,16 +1,16 @@
+use crate::logger::Logger;
+use crate::network::protocol::compression::decompress;
+use binary_utils::{BinaryStream, IBinaryStream, IBufferRead};
+use rakrs::{conn::Connection, Motd, RakNetEvent, RakNetServer, SERVER_ID};
 use std::collections::HashMap;
 use std::sync::Arc;
-use rakrs::{ RakNetServer, conn::Connection, RakNetEvent, Motd, SERVER_ID };
-use binary_utils::{BinaryStream, IBinaryStream, IBufferRead};
-use crate::network::protocol::compression::decompress;
-use crate::logger::Logger;
 
 pub struct Server {
 	// players on the server
 	// change to actual player struct in the future
 	players: HashMap<String, u8>,
 	logger: Logger,
-	network: Option<RakNetServer>
+	network: Option<RakNetServer>,
 }
 
 impl Server {
@@ -18,7 +18,7 @@ impl Server {
 		Self {
 			players: HashMap::new(),
 			logger: Logger::new("Server".to_owned()),
-			network: None
+			network: None,
 		}
 	}
 
@@ -32,8 +32,11 @@ impl Server {
 			let result = decompress(&stream.get_buffer()[stream.get_offset()..]);
 
 			if result.is_err() {
-				println!("Something when wrong when decoding: {}", result.unwrap_err());
-				return
+				println!(
+					"Something when wrong when decoding: {}",
+					result.unwrap_err()
+				);
+				return;
 			}
 
 			let mut decompressed = result.unwrap();
@@ -67,7 +70,5 @@ impl Server {
 		self.players.clone()
 	}
 
-	fn tick(&mut self) {
-
-	}
+	fn tick(&mut self) {}
 }

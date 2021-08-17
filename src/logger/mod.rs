@@ -14,9 +14,7 @@ impl Logger {
 			.append(true)
 			.open("server.log");
 
-		let config = ConfigBuilder::new()
-			.set_time_to_local(true)
-			.build();
+		let config = ConfigBuilder::new().set_time_to_local(true).build();
 
 		CombinedLogger::init(vec![
 			TermLogger::new(

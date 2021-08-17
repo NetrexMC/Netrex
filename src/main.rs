@@ -1,9 +1,9 @@
-pub mod network;
 pub mod logger;
+pub mod network;
 pub mod plugin;
+pub mod server;
 pub mod util;
 pub mod world;
-pub mod server;
 
 use server::Server;
 

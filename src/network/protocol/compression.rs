@@ -1,9 +1,9 @@
-use std::io;
-use std::io::prelude::*;
+use binary_utils::{BinaryStream, IBinaryStream};
 use flate2::read::DeflateDecoder;
 use flate2::write::DeflateEncoder;
 use flate2::Compression;
-use binary_utils::{BinaryStream, IBinaryStream};
+use std::io;
+use std::io::prelude::*;
 
 pub fn decompress(raw_buf: &[u8]) -> io::Result<BinaryStream> {
 	let mut ret_data: Vec<u8> = Vec::new();
@@ -11,7 +11,7 @@ pub fn decompress(raw_buf: &[u8]) -> io::Result<BinaryStream> {
 
 	match reader.read_to_end(&mut ret_data) {
 		Ok(_) => Ok(BinaryStream::init(&ret_data)),
-		Err(v) => Err(v)
+		Err(v) => Err(v),
 	}
 }
 
@@ -23,7 +23,7 @@ pub fn compress(buf: &mut [u8]) -> io::Result<BinaryStream> {
 	} else {
 		match writer.finish() {
 			Ok(v) => Ok(BinaryStream::init(&v)),
-			Err(v) => Err(v)
+			Err(v) => Err(v),
 		}
 	}
 }
