@@ -144,6 +144,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "pin-project-lite"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d31d11c69a6b52a174b42bdc0c30e5e11670f90788b2c471c31c1d17d449443"
+
+[[package]]
 name = "pkg-config"
 version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -158,10 +164,11 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 [[package]]
 name = "rakrs"
 version = "0.1.0"
-source = "git+https://github.com/NetrexMC/RakNet?branch=master#fc5393a55b6deb33cf8f9eb454c00df9303f2862"
+source = "git+https://github.com/NetrexMC/RakNet?branch=master#fae9d580869a67e654873f27c873e7096d8481ca"
 dependencies = [
  "binary_utils",
  "rand",
+ "tokio",
 ]
 
 [[package]]
@@ -232,6 +239,16 @@ checksum = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
 dependencies = [
  "libc",
  "winapi",
+]
+
+[[package]]
+name = "tokio"
+version = "1.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01cf844b23c6131f624accf65ce0e4e9956a8bb329400ea5bcc26ae3a5c20b0b"
+dependencies = [
+ "autocfg",
+ "pin-project-lite",
 ]
 
 [[package]]
