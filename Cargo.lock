@@ -104,6 +104,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mcpe_protocol"
+version = "0.1.0"
+source = "git+https://github.com/NetrexMC/Protocol?branch=master#e5b42e90b0eac81322533ff9f62d5609d9908a11"
+dependencies = [
+ "binary_utils",
+ "flate2",
+ "rakrs",
+]
+
+[[package]]
 name = "miniz_oxide"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -120,6 +130,7 @@ dependencies = [
  "binary_utils",
  "flate2",
  "log",
+ "mcpe_protocol",
  "rakrs",
  "simplelog",
 ]
