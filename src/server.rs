@@ -1,7 +1,8 @@
 use crate::logger::Logger;
 use crate::network::protocol::compression::decompress;
 use binary_utils::{BinaryStream, IBinaryStream, IBufferRead};
-use rakrs::{conn::Connection, Motd, RakNetEvent, RakNetServer, SERVER_ID};
+use rakrs::{Motd, RakNetEvent, RakNetServer, SERVER_ID, RakEventListenerFn};
+use rakrs::conn::{Connection, RecievePacketFn};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -25,9 +26,10 @@ impl Server {
 	pub fn start(&mut self, address: &str) {
 		let mut raknet = RakNetServer::new(address.to_string());
 		let ref_rak = Arc::new(&raknet);
+		let mut logger_cloned = self.get_logger();
 		self.logger.info("Starting Server");
 
-		raknet.set_reciever(move |_conn: &mut Connection, stream: &mut BinaryStream| {
+		let packet_handler: Arc<RecievePacketFn> =  Arc::new(move |_conn: &mut Connection, stream: &mut BinaryStream| {
 			stream.read_byte();
 			let result = decompress(&stream.get_buffer()[stream.get_offset()..]);
 
@@ -52,7 +54,15 @@ impl Server {
 			println!("Packet ID: {}", frames[0].read_byte())
 		});
 
-		let (_send, _work) = raknet.start();
+		let event_handler: Box<RakEventListenerFn> = Box::new(move |event: &RakNetEvent| {
+			match event.clone() {
+				RakNetEvent::Disconnect(address, reason) => {
+					logger_cloned.info(&format!("{} disconnected due to: {}", address, reason).to_string()[..]);
+				},
+				_ => return
+			}
+		});
+		let (_send, _work) = raknet.start(packet_handler, event_handler);
 		self.logger.info("RakNet Started.");
 		self.network = Some(raknet);
 		self.logger.info("Server started!");

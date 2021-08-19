@@ -164,7 +164,7 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 [[package]]
 name = "rakrs"
 version = "0.1.0"
-source = "git+https://github.com/NetrexMC/RakNet?branch=master#fae9d580869a67e654873f27c873e7096d8481ca"
+source = "git+https://github.com/NetrexMC/RakNet?branch=master#d74cffd40a948c00e9863cda5e661e3f4cc8ec14"
 dependencies = [
  "binary_utils",
  "rand",
