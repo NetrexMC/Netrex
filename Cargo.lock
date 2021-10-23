@@ -355,7 +355,7 @@ dependencies = [
 [[package]]
 name = "rakrs"
 version = "0.1.0"
-source = "git+https://github.com/NetrexMC/RakNet?branch=v2#091c290fae209f3b91249604ae6682fad7f0bc8f"
+source = "git+https://github.com/NetrexMC/RakNet?branch=v2#ac583828914120328d4ebd53daf8610a9c512278"
 dependencies = [
  "binary_utils",
  "byteorder",
