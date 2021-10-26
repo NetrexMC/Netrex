@@ -2,7 +2,7 @@ use log::*;
 use simplelog::*;
 use std::fs::OpenOptions;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Logger {
     prefix: String,
 }

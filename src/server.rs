@@ -11,6 +11,11 @@ use std::collections::HashMap;
 use std::io::{Cursor, Read, Write};
 use std::sync::{Arc, Mutex};
 
+macro_rules! exp {
+	($e: expr) => {
+		::std::sync::Arc::make_mut(&mut $e)
+	};
+}
 pub struct Server {
     // players on the server
     // change to actual player struct in the future
@@ -28,7 +33,10 @@ impl Server {
         }
     }
 
-    pub fn recieve(&mut self, address: String, buffer: Vec<u8>) {}
+    pub fn recieve(&mut self, address: String, buffer: Vec<u8>) {
+		let mut buf = Cursor::new(buffer);
+		println!("{} sent packet: {}", address, buf.read_u8().unwrap());
+	}
 
     pub fn get_logger(&mut self) -> Logger {
         self.logger.clone()
@@ -41,19 +49,21 @@ impl Server {
     fn tick(&mut self) {}
 }
 
-pub fn start(server: &'static mut Mutex<Server>, address: &str) {
+pub fn start(server: Arc<Mutex<Server>>, address: &str) {
+		let mut server_thread = Arc::clone(&server);
 		let mut raknet = RakNetServer::new(address.to_string());
-		let s = server.lock().unwrap();
-        let mut logger = s.get_logger().clone();
-		let server_clone = Arc::new(&server);
+		let mut s = server.lock().unwrap();
+        let mut logger = Arc::new(s.get_logger().clone());
 		drop(s);
-		// let reciever = Box::new(server.receive);
 
-        logger.info("Starting Server");
-        let threads = raknet_start!(raknet, move |event: &RakNetEvent| {
+        let mut logger_thread = Arc::clone(&logger);
+
+
+        exp!(logger).info("Starting Server");
+        let _threads = raknet_start!(raknet, move |event: &RakNetEvent| {
             match event.clone() {
                 RakNetEvent::Disconnect(address, reason) => {
-                    logger.info(
+                    exp!(logger_thread).info(
                         &format!("{} disconnected due to: {}", address, reason).to_string()[..],
                     );
                     None
@@ -79,17 +89,13 @@ pub fn start(server: &'static mut Mutex<Server>, address: &str) {
                             break;
                         }
                         let mut position: usize = dstream.position() as usize;
-                        let s = &VarSlice::compose(&decompressed[position..], &mut position)
+                        let s: &Vec<u8> = &VarSlice::compose(&decompressed[position..], &mut position)
                             .0
                             .clone();
                         dstream.set_position(position as u64);
                         frames.push(s.to_vec());
                     }
-                    logger.info(
-                        &format!("Client[{}] sent packet: {:?}", address, frames[0][0]).to_string()
-                            [..],
-                    );
-					let serv = server.lock().expect("Uh oh...");
+					let mut serv = server_thread.lock().expect("not cool!");
 					for frame in frames {
 						// func(address.clone(), frame);
 						serv.recieve(address.clone(), frame);
@@ -100,19 +106,27 @@ pub fn start(server: &'static mut Mutex<Server>, address: &str) {
                 _ => None,
             }
         });
-        logger.info("RakNet Started.");
-		let serv = server.lock().unwrap();
+        exp!(logger).info("RakNet Started.");
+		let mut serv = server.as_ref().lock().unwrap();
 		serv.network = Some(raknet);
         drop(serv);
-        logger.info("Server started!");
+        exp!(logger).info("Server started!");
 
         loop {
-			if let Ok(serv) = server.try_lock() {
+			if let Ok(mut serv) = server.try_lock() {
             	serv.tick();
-				drop(serv)
+				drop(serv);
 			} else {
-				
+				// if the tick fails, infinitely retry until we're able to do so
+				loop {
+					// this will hang if this errors
+					if let Ok(mut serv) = server.try_lock() {
+						println!("Saved tick!");
+						serv.tick();
+						drop(serv);
+						break;
+					}
+				}
 			}
         }
-		drop(server);
 }
