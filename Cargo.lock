@@ -261,7 +261,7 @@ dependencies = [
 [[package]]
 name = "mcpe_protocol"
 version = "0.1.0"
-source = "git+https://github.com/NetrexMC/Protocol?branch=master#ee89a4552329de69fc600dc6d83dfb1ce8b31109"
+source = "git+https://github.com/NetrexMC/Protocol?branch=master#2a190a0e64934e283513544268b6077b915c1f47"
 dependencies = [
  "binary_utils",
  "byteorder",

@@ -1,9 +1,12 @@
 use crate::logger::Logger;
 use crate::network::protocol::compression::decompress;
+use crate::network::protocol::mcbe::login::deconstruct;
 use binary_utils::*;
 use mcpe_protocol::interfaces::{Slice, VarSlice};
+use mcpe_protocol::mcpe::*;
 
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use mcpe_protocol::mcpe::{GamePacket, construct_packet};
 use rakrs::conn::Connection;
 use rakrs::raknet_start;
 use rakrs::{Motd, RakEventListenerFn, RakNetEvent, RakNetServer, RakResult, SERVER_ID};
@@ -34,8 +37,19 @@ impl Server {
     }
 
     pub fn recieve(&mut self, address: String, buffer: Vec<u8>) {
-		let mut buf = Cursor::new(buffer);
-		println!("{} sent packet: {}", address, buf.read_u8().unwrap());
+		let mut buf = Cursor::new(&buffer);
+		// get the id of the packet
+		let id = buf.read_u8().unwrap();
+
+		let packet: GamePacket = construct_packet(id, &buffer[1..]);
+
+		match packet {
+			GamePacket::Login(pk) => {
+				let data = deconstruct(pk);
+				dbg!(data);
+			},
+			_ => return
+		}
 	}
 
     pub fn get_logger(&mut self) -> Logger {
@@ -60,7 +74,7 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
 
 
         exp!(logger).info("Starting Server");
-        let _threads = raknet_start!(raknet, move |event: &RakNetEvent| {
+        let threads = raknet_start!(raknet, move |event: &RakNetEvent| {
             match event.clone() {
                 RakNetEvent::Disconnect(address, reason) => {
                     exp!(logger_thread).info(
@@ -112,21 +126,27 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
         drop(serv);
         exp!(logger).info("Server started!");
 
-        loop {
-			if let Ok(mut serv) = server.try_lock() {
-            	serv.tick();
-				drop(serv);
-			} else {
-				// if the tick fails, infinitely retry until we're able to do so
-				loop {
-					// this will hang if this errors
-					if let Ok(mut serv) = server.try_lock() {
-						println!("Saved tick!");
-						serv.tick();
-						drop(serv);
-						break;
-					}
-				}
-			}
-        }
+		// start event loop
+		threads.0.join();
+		threads.1.join();
+
+        // loop {
+		// 	if let Ok(mut serv) = server.try_lock() {
+        //     	serv.tick();
+		// 		drop(serv);
+		// 	} else {
+		// 		// if the tick fails, infinitely retry until we're able to do so
+		// 		loop {
+		// 			// this will hang if this errors
+		// 			if let Ok(mut serv) = server.try_lock() {
+		// 				println!("Saved tick!");
+		// 				serv.tick();
+		// 				drop(serv);
+		// 				break;
+		// 			}
+		// 		}
+		// 	}
+        // }
+		// server ticking is bad.
+		
 }
