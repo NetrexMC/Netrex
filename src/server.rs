@@ -9,12 +9,13 @@ use rakrs::raknet_start;
 use rakrs::{Motd, RakEventListenerFn, RakNetEvent, RakNetServer, RakResult, SERVER_ID};
 use std::collections::HashMap;
 use std::io::{Cursor, Read, Write};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
+
 pub struct Server {
     // players on the server
     // change to actual player struct in the future
-    players: HashMap<String, u8>,
-    logger: Logger,
+    pub players: HashMap<String, u8>,
+    pub logger: Logger,
     network: Option<RakNetServer>,
 }
 
@@ -27,18 +28,32 @@ impl Server {
         }
     }
 
-    pub fn receive(address: String, buffer: Vec<u8>) {}
+    pub fn recieve(&mut self, address: String, buffer: Vec<u8>) {}
 
-    pub fn start(&mut self, address: &str) {
-        let mut raknet = RakNetServer::new(address.to_string());
-        let ref_rak = Arc::new(&self);
-        let mut logger_cloned = self.get_logger();
+    pub fn get_logger(&mut self) -> Logger {
+        self.logger.clone()
+    }
 
-        self.logger.info("Starting Server");
-        let (_send, _work) = raknet_start!(raknet, move |event: &RakNetEvent| {
+    pub fn get_players(&mut self) -> HashMap<String, u8> {
+        self.players.clone()
+    }
+
+    fn tick(&mut self) {}
+}
+
+pub fn start(server: &'static mut Mutex<Server>, address: &str) {
+		let mut raknet = RakNetServer::new(address.to_string());
+		let s = server.lock().unwrap();
+        let mut logger = s.get_logger().clone();
+		let server_clone = Arc::new(&server);
+		drop(s);
+		// let reciever = Box::new(server.receive);
+
+        logger.info("Starting Server");
+        let threads = raknet_start!(raknet, move |event: &RakNetEvent| {
             match event.clone() {
                 RakNetEvent::Disconnect(address, reason) => {
-                    logger_cloned.info(
+                    logger.info(
                         &format!("{} disconnected due to: {}", address, reason).to_string()[..],
                     );
                     None
@@ -70,31 +85,34 @@ impl Server {
                         dstream.set_position(position as u64);
                         frames.push(s.to_vec());
                     }
-                    logger_cloned.info(
+                    logger.info(
                         &format!("Client[{}] sent packet: {:?}", address, frames[0][0]).to_string()
                             [..],
                     );
+					let serv = server.lock().expect("Uh oh...");
+					for frame in frames {
+						// func(address.clone(), frame);
+						serv.recieve(address.clone(), frame);
+					}
+					drop(serv);
                     Some(RakResult::Motd(Motd::default()))
                 }
                 _ => None,
             }
         });
-        self.logger.info("RakNet Started.");
-        self.network = Some(raknet);
-        self.logger.info("Server started!");
+        logger.info("RakNet Started.");
+		let serv = server.lock().unwrap();
+		serv.network = Some(raknet);
+        drop(serv);
+        logger.info("Server started!");
 
         loop {
-            self.tick();
+			if let Ok(serv) = server.try_lock() {
+            	serv.tick();
+				drop(serv)
+			} else {
+				
+			}
         }
-    }
-
-    pub fn get_logger(&mut self) -> Logger {
-        self.logger.clone()
-    }
-
-    pub fn get_players(&mut self) -> HashMap<String, u8> {
-        self.players.clone()
-    }
-
-    fn tick(&mut self) {}
+		drop(server);
 }
