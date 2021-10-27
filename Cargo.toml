@@ -8,9 +8,9 @@ edition = "2018"
 
 [dependencies]
 # Hard depend on binary_utils
-binary_utils = { git = "https://github.com/NetrexMC/BinaryUtil", branch = "v2" }
+binary_utils = { git = "https://github.com/NetrexMC/BinaryUtil", branch = "master" }
 flate2 = { version = "1.0.20", features = ["zlib"] }
-rakrs = { git = "https://github.com/NetrexMC/RakNet", branch = "issue-16/functional" }
+rakrs = { git = "https://github.com/NetrexMC/RakNet", branch = "v2" }
 mcpe_protocol = { git = "https://github.com/NetrexMC/Protocol", branch = "master" }
 simplelog = "0.10.0"
 log = "0.4.14"
