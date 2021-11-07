@@ -1,5 +1,6 @@
 pub mod logger;
 pub mod network;
+pub mod player;
 pub mod plugin;
 pub mod server;
 pub mod util;

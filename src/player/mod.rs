@@ -1,5 +1,9 @@
+pub mod session;
+
+use session::PlayerSession;
+
 pub struct Player {
-	address: String,
+	// pub session: &mut PlayerSession
 }
 
 impl Player {

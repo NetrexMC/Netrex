@@ -1,17 +1,15 @@
 use crate::logger::Logger;
 use crate::network::protocol::compression::decompress;
-use crate::network::protocol::mcbe::login::deconstruct;
+use crate::network::protocol::mcbe::login::do_login;
 use binary_utils::*;
-use mcpe_protocol::interfaces::{Slice, VarSlice};
-use mcpe_protocol::mcpe::*;
+use mcpe_protocol::interfaces::VarSlice;
 
-use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
+use byteorder::ReadBytesExt;
 use mcpe_protocol::mcpe::{GamePacket, construct_packet};
-use rakrs::conn::Connection;
 use rakrs::raknet_start;
-use rakrs::{Motd, RakEventListenerFn, RakNetEvent, RakNetServer, RakResult, SERVER_ID};
+use rakrs::{Motd, RakNetEvent, RakNetServer, RakResult};
 use std::collections::HashMap;
-use std::io::{Cursor, Read, Write};
+use std::io::Cursor;
 use std::sync::{Arc, Mutex};
 
 macro_rules! exp {
@@ -20,17 +18,16 @@ macro_rules! exp {
 	};
 }
 pub struct Server {
-    // players on the server
-    // change to actual player struct in the future
-    pub players: HashMap<String, u8>,
+    /// A Hashmap of players connected to the server.
+    pub sessions: HashMap<String, u8>,
     pub logger: Logger,
-    network: Option<RakNetServer>,
+    pub network: Option<RakNetServer>,
 }
 
 impl Server {
     pub fn new() -> Self {
         Self {
-            players: HashMap::new(),
+            sessions: HashMap::new(),
             logger: Logger::new("Server".to_owned()),
             network: None,
         }
@@ -42,11 +39,15 @@ impl Server {
 		let id = buf.read_u8().unwrap();
 
 		let packet: GamePacket = construct_packet(id, &buffer[1..]);
+		// dropped bytes
+		// println!("Dropped bytes: {:?}\n", &buffer[5..45]);
 
 		match packet {
 			GamePacket::Login(pk) => {
-				let data = deconstruct(pk);
-				dbg!(data);
+				println!("{:?}", &pk.protocol);
+				// let data = deconstruct(pk);
+				// dbg!(data);
+				do_login(self, address, pk);
 			},
 			_ => return
 		}
@@ -57,14 +58,12 @@ impl Server {
     }
 
     pub fn get_players(&mut self) -> HashMap<String, u8> {
-        self.players.clone()
+        self.sessions.clone()
     }
-
-    fn tick(&mut self) {}
 }
 
 pub fn start(server: Arc<Mutex<Server>>, address: &str) {
-		let mut server_thread = Arc::clone(&server);
+		let server_thread = Arc::clone(&server);
 		let mut raknet = RakNetServer::new(address.to_string());
 		let mut s = server.lock().unwrap();
         let mut logger = Arc::new(s.get_logger().clone());
@@ -103,7 +102,8 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
                             break;
                         }
                         let mut position: usize = dstream.position() as usize;
-                        let s: &Vec<u8> = &VarSlice::compose(&decompressed[position..], &mut position)
+
+                        let s: &Vec<u8> = &VarSlice::fcompose(&decompressed[position..], &mut position)
                             .0
                             .clone();
                         dstream.set_position(position as u64);
@@ -112,6 +112,7 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
 					let mut serv = server_thread.lock().expect("not cool!");
 					for frame in frames {
 						// func(address.clone(), frame);
+						// get the connection
 						serv.recieve(address.clone(), frame);
 					}
 					drop(serv);
