@@ -40,30 +40,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "bin_macro"
-version = "0.1.0"
-source = "git+https://github.com/NetrexMC/BinaryUtil?branch=v2#0318c3f0aa9f820d206422fe9ed4cb6eb961214b"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "binary_utils"
-version = "0.2.0"
-source = "git+https://github.com/NetrexMC/BinaryUtil?branch=v2#0318c3f0aa9f820d206422fe9ed4cb6eb961214b"
-dependencies = [
- "bin_macro 0.1.0 (git+https://github.com/NetrexMC/BinaryUtil?branch=v2)",
- "byteorder",
-]
-
-[[package]]
 name = "binary_utils"
 version = "0.2.1"
 source = "git+https://github.com/NetrexMC/BinaryUtil?tag=v0.2.1#0f34ea9d0d8d1529399e9861bf0f41382c1fe180"
 dependencies = [
- "bin_macro 0.1.0 (git+https://github.com/NetrexMC/BinaryUtil?tag=v0.2.1)",
+ "bin_macro",
  "byteorder",
 ]
 
@@ -360,7 +341,7 @@ name = "mcpe_protocol"
 version = "0.1.0"
 source = "git+https://github.com/NetrexMC/Protocol?branch=master#1918d5642200f37578678ab22e8fdd57c1e8c20b"
 dependencies = [
- "binary_utils 0.2.1",
+ "binary_utils",
  "byteorder",
  "glm",
  "serde_json",
@@ -399,7 +380,7 @@ name = "netrex"
 version = "0.1.0"
 dependencies = [
  "base64",
- "binary_utils 0.2.1",
+ "binary_utils",
  "byteorder",
  "flate2",
  "jwt",
@@ -543,10 +524,10 @@ dependencies = [
 
 [[package]]
 name = "rakrs"
-version = "0.1.0"
-source = "git+https://github.com/NetrexMC/RakNet?branch=v2#7a27bc5d0dad65329af48c965285a00fde9cdb44"
+version = "0.2.1"
+source = "git+https://github.com/NetrexMC/RakNet?tag=v0.2.1#6ff81ad1981006a82f811e311ae3132cee97fa3c"
 dependencies = [
- "binary_utils 0.2.0",
+ "binary_utils",
  "byteorder",
  "crossbeam",
  "crossbeam-utils",
