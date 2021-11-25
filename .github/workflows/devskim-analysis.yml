@@ -1,7 +1,6 @@
 name: DevSkim
 
 on:
-  push:
   schedule:
     - cron: '00 09 * * 1'
 
