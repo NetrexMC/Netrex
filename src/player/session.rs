@@ -1,5 +1,5 @@
-use rakrs::{RakNetServer, conn::Connection};
+use rakrs::{conn::Connection, RakNetServer};
 
 pub struct PlayerSession<'a> {
-	connection: &'a mut Connection
+    connection: &'a mut Connection,
 }
