@@ -1,0 +1,57 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test-formatting:
+    name: Code style check
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '-skip')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run fmt test
+      uses: actions-rs/cargo@v1.0.1
+      with:
+        command: fmt
+        args: -- --check
+  test-stable:
+    name: Run tests on Stable
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '-skip')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup stable toolchain
+      uses: actions-rs/toolchain@v1.0.6
+      with:
+        toolchain: stable
+    - name: Run test
+      uses: actions-rs/cargo@v1.0.1
+      with:
+        command: test
+  test-beta:
+    name: Run tests on Beta
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '-skip')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup beta toolchain
+      uses: actions-rs/toolchain@v1.0.6
+      with:
+        toolchain: beta
+    - name: Run test
+      uses: actions-rs/cargo@v1.0.1
+      with:
+        command: test
+  test-nightly:
+    name: Run tests on Nightly
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '-skip')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run test
+      uses: actions-rs/cargo@v1.0.1
+      with:
+        command: test
+    - name: Setup nightly toolchain
+      uses: actions-rs/toolchain@v1.0.6
+      with:
+        toolchain: nightly
