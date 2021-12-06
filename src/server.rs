@@ -6,6 +6,7 @@ use mcpe_protocol::interfaces::VarSlice;
 
 use byteorder::ReadBytesExt;
 use mcpe_protocol::mcpe::{construct_packet, GamePacket};
+use netrex_events::Channel;
 use rakrs::raknet_start;
 use rakrs::{Motd, RakNetEvent, RakNetServer, RakResult};
 use std::collections::HashMap;
@@ -33,7 +34,7 @@ impl Server {
         }
     }
 
-    pub fn recieve(&mut self, address: String, buffer: Vec<u8>) {
+    pub fn receive(&mut self, address: String, buffer: Vec<u8>) {
         let mut buf = Cursor::new(&buffer);
         // get the id of the packet
         let id = buf.read_u8().unwrap();
@@ -72,7 +73,9 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
     let mut logger_thread = Arc::clone(&logger);
 
     exp!(logger).info("Starting Server");
-    let threads = raknet_start!(raknet, move |event: &RakNetEvent| {
+
+	let mut channel = Channel::<RakNetEvent, RakResult>::new();
+	let mut listener = |event: RakNetEvent, result: Option<RakResult>| -> Option<RakResult> {
         match event.clone() {
             RakNetEvent::Disconnect(address, reason) => {
                 exp!(logger_thread)
@@ -111,23 +114,21 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
                 for frame in frames {
                     // func(address.clone(), frame);
                     // get the connection
-                    serv.recieve(address.clone(), frame);
+                    serv.receive(address.clone(), frame);
                 }
                 drop(serv);
                 Some(RakResult::Motd(Motd::default()))
             }
             _ => None,
         }
-    });
+    };
+	channel.receive(&mut listener);
+    let threads = raknet_start!(raknet, channel);
     exp!(logger).info("RakNet Started.");
     let mut serv = server.as_ref().lock().unwrap();
     serv.network = Some(raknet);
     drop(serv);
     exp!(logger).info("Server started!");
-
-    // start event loop
-    threads.0.join();
-    threads.1.join();
 
     // loop {
     // 	if let Ok(mut serv) = server.try_lock() {

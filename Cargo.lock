@@ -401,13 +401,23 @@ dependencies = [
  "base64",
  "binary_utils 0.2.2",
  "byteorder",
+ "crossbeam",
  "flate2",
  "jwt",
  "log 0.4.14",
  "mcpe_protocol",
+ "netrex_events",
  "rakrs",
  "serde_json",
  "simplelog",
+]
+
+[[package]]
+name = "netrex_events"
+version = "0.1.0"
+source = "git+https://github.com/NetrexMC/Events?branch=master#08fd901974136a29fe84f024fdc05205c8c9a726"
+dependencies = [
+ "crossbeam",
 ]
 
 [[package]]
@@ -544,12 +554,12 @@ dependencies = [
 [[package]]
 name = "rakrs"
 version = "0.2.1"
-source = "git+https://github.com/NetrexMC/RakNet?tag=v0.2.1#6ff81ad1981006a82f811e311ae3132cee97fa3c"
+source = "git+https://github.com/NetrexMC/RakNet?branch=master#df83adb4697e4f8dc59e8e1e5df015abfe842bee"
 dependencies = [
  "binary_utils 0.2.1",
  "byteorder",
  "crossbeam",
- "crossbeam-utils",
+ "netrex_events",
  "rand 0.8.4",
  "tokio",
 ]
