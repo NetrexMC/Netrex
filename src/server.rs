@@ -74,8 +74,8 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
 
     exp!(logger).info("Starting Server");
 
-	let mut channel = Channel::<RakNetEvent, RakResult>::new();
-	let mut listener = |event: RakNetEvent, result: Option<RakResult>| -> Option<RakResult> {
+    let mut channel = Channel::<RakNetEvent, RakResult>::new();
+    let mut listener = |event: RakNetEvent, result: Option<RakResult>| -> Option<RakResult> {
         match event.clone() {
             RakNetEvent::Disconnect(address, reason) => {
                 exp!(logger_thread)
@@ -122,7 +122,7 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
             _ => None,
         }
     };
-	channel.receive(&mut listener);
+    channel.receive(&mut listener);
     let threads = raknet_start!(raknet, channel);
     exp!(logger).info("RakNet Started.");
     let mut serv = server.as_ref().lock().unwrap();
