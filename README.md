@@ -1,10 +1,10 @@
 <div align="center">
      <p>
-          <img width="150" alt="Netrex" src="https://i.imgur.com/I1unWMx.png">
-     </p>
+          <img width="150" alt="Netrex" src="https://raw.githubusercontent.com/NetrexMC/Netrex/master/assets/netrex_dark.png#gh-dark-mode-only">
+          <img width="150" alt="Netrex" src="https://raw.githubusercontent.com/NetrexMC/Netrex/master/assets/netrex_light.png#gh-light-mode-only"> 
+    </p>
      <p>
-          <h1> Netrex </h1>
-          <p>A powerful minecraft bedrock software written in RustLang. </p>
+          <p>A minecraft bedrock software written in Rust.</p>
      </p>
 </div>
 
@@ -12,17 +12,18 @@
 
 ## Why Netrex?
 
- - It's written in Rust.
- - Unique and straight to the point.
- - Typescript Plugin API
- - Single Executable.
- - Open Source.
+- It's written in Rust.
+- Unique and straight to the point.
+- Typescript Plugin API
+- Single Executable.
+- Open Source.
 
 ## The Game Plan
 
 We have a plan for the initial release! View it on our [projects page](https://github.com/NetrexMC/Netrex/projects/1)!
 
 ## Scripts
+
 All scripts can be accessed and viewed through the terminal by running `deno run -A ./scripts/mod.ts` in the home directory, or by installing them with deno. In this case, the name will be "nsc".
 
 ### Install Netrex Scripts
