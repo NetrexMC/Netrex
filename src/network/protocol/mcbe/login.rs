@@ -35,6 +35,11 @@ pub fn decode_login(packet: Login) -> Result<LoginData, serde_json::Error> {
 pub fn do_login(server: &mut Server, address: String, packet: Login) {
     if let Ok(login_data) = decode_login(packet) {
         // send play status
+		if login_data.protocol > 400 {
+
+		} else {
+			
+		}
     } else {
     }
 }

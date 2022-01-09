@@ -4,5 +4,7 @@ dlts
 # Added by cargo
 
 /target
+Cargo.lock
 
+# Added by logger
 server.log

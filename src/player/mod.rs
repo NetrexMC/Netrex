@@ -1,6 +1,7 @@
 pub mod session;
+pub mod skin;
 
-use session::PlayerSession;
+// use session::PlayerSession;
 
 pub struct Player {
     // pub session: &mut PlayerSession

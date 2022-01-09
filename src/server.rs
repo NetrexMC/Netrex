@@ -7,8 +7,7 @@ use mcpe_protocol::interfaces::VarSlice;
 use byteorder::ReadBytesExt;
 use mcpe_protocol::mcpe::{construct_packet, GamePacket};
 use netrex_events::Channel;
-use rakrs::raknet_start;
-use rakrs::{Motd, RakNetEvent, RakNetServer, RakResult};
+use rakrs::{Motd, RakEvent, RakNetServer, RakResult, start};
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::sync::{Arc, Mutex};
@@ -22,7 +21,7 @@ pub struct Server {
     /// A Hashmap of players connected to the server.
     pub sessions: HashMap<String, u8>,
     pub logger: Logger,
-    pub network: Option<RakNetServer>,
+    pub network: Option<Mutex<RakNetServer>>,
 }
 
 impl Server {
@@ -54,6 +53,10 @@ impl Server {
         }
     }
 
+	pub fn send_packet(&mut self, address: String, packet: GamePacket) {
+		
+	}
+
     pub fn get_logger(&mut self) -> Logger {
         self.logger.clone()
     }
@@ -65,7 +68,7 @@ impl Server {
 
 pub fn start(server: Arc<Mutex<Server>>, address: &str) {
     let server_thread = Arc::clone(&server);
-    let mut raknet = RakNetServer::new(address.to_string());
+    let raknet = RakNetServer::new(address.to_string());
     let mut s = server.lock().unwrap();
     let mut logger = Arc::new(s.get_logger().clone());
     drop(s);
@@ -74,8 +77,8 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
 
     exp!(logger).info("Starting Server");
 
-    let mut channel = Channel::<RakNetEvent, RakResult>::new();
-    let mut listener = |event: RakNetEvent, result: Option<RakResult>| -> Option<RakResult> {
+    let channel = Channel::<RakNetEvent, RakResult>::new();
+    let mut listener = |event: RakNetEvent, _: Option<RakResult>| -> Option<RakResult> {
         match event.clone() {
             RakNetEvent::Disconnect(address, reason) => {
                 exp!(logger_thread)
@@ -123,11 +126,10 @@ pub fn start(server: Arc<Mutex<Server>>, address: &str) {
         }
     };
     channel.receive(&mut listener);
-    let threads = raknet_start!(raknet, channel);
+    let _ = raknet_start!(raknet, channel);
     exp!(logger).info("RakNet Started.");
     let mut serv = server.as_ref().lock().unwrap();
-    serv.network = Some(raknet);
-    drop(serv);
+    serv.network = Arc::clone(&server);
     exp!(logger).info("Server started!");
 
     // loop {
