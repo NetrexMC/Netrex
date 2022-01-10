@@ -12,7 +12,8 @@ use std::sync::Mutex;
 use server::start;
 use server::Server;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let server = Arc::new(Mutex::new(Server::new()));
-    start(Arc::clone(&server), &"0.0.0.0:19132");
+    start(Arc::clone(&server), "0.0.0.0:19132").await;
 }

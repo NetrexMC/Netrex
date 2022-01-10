@@ -1,10 +1,15 @@
-pub mod session;
+use crate::network::session::Session;
+
 pub mod skin;
 
 // use session::PlayerSession;
 
 pub struct Player {
-    // pub session: &mut PlayerSession
+    pub(crate) session: Session,
 }
 
-impl Player {}
+impl Player {
+	pub fn new(session: Session) -> Self {
+		Player { session }
+	}
+}
