@@ -1,22 +1,20 @@
 use crate::logger::Logger;
 use crate::network::protocol::compression::decompress;
-use crate::network::protocol::mcbe::login::do_login;
 use crate::network::session::Session;
+use crate::player::{Player, PlayerData};
 use binary_utils::*;
 use mcpe_protocol::interfaces::VarSlice;
 
 use byteorder::ReadBytesExt;
-use mcpe_protocol::mcpe::{construct_packet, GamePacket};
 use netrex_events::Channel;
 use rakrs::{RakEvent, RakNetServer, RakResult};
 use std::collections::HashMap;
 use std::io::Cursor;
-use std::sync::{Arc, Mutex};
-use tokio::sync::RwLock;
+use std::sync::{Arc, Mutex, RwLock};
 
 pub struct Server {
     /// A Hashmap of players connected to the server.
-    pub players: RwLock<HashMap<String, Session>>,
+    pub players: RwLock<HashMap<String, Player>>,
     pub logger: Logger,
     pub network: Option<Arc<RakNetServer>>,
 }
@@ -30,19 +28,22 @@ impl Server {
         }
     }
 
-    pub fn receive(&mut self, address: String, buffer: Vec<u8>) {
-        let packet: GamePacket = GamePacket::compose(&buffer[..], &mut 0).unwrap();
-        // dropped bytes
-        // println!("Dropped bytes: {:?}\n", &buffer[5..45]);
+    pub async fn receive(&mut self, address: String, buffer: Vec<u8>) {
+        let mut lock = self.players.write().expect("Failed to lock players");
+        if !lock.contains_key(&address) {
+            // create a new session for the player
+            self.logger
+                .info(&format!("New player connected: {}", address));
+            let session = Session::new(address.clone());
+            let player = Player::new(session, PlayerData::unknown());
+            lock.insert(address.clone(), player);
+        }
 
-        match packet {
-            GamePacket::Login(pk) => {
-                println!("{:?}", &pk.protocol);
-                // let data = deconstruct(pk);
-                // dbg!(data);
-                do_login(self, address, pk);
-            }
-            _ => return,
+        let player = lock.get_mut(&address).expect("Failed to get player");
+        let res = player.handle(buffer).await;
+        if let Err(e) = res {
+            self.logger
+                .error(&format!("Failed to handle packet: {:?}", e));
         }
     }
 
@@ -95,7 +96,8 @@ pub async fn start<Add: Into<String>>(s: Arc<Mutex<Server>>, address: Add) {
                 for frame in frames {
                     // func(address.clone(), frame);
                     // get the connection
-                    serv.receive(address.clone(), frame);
+                    // todo: REMOVE THIS HACK LOL
+                    futures_executor::block_on(serv.receive(address.clone(), frame));
                 }
                 drop(serv);
                 None

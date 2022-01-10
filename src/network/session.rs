@@ -1,11 +1,11 @@
 use std::collections::VecDeque;
 
-use mcpe_protocol::mcpe::GamePacket;
+use mcpe_protocol::mcpe::Packet;
 use tokio::sync::mpsc::Sender;
 
 #[derive(Debug, Clone)]
 pub enum SessionCommand {
-    Send(GamePacket),
+    Send(Packet),
     SendStream(Vec<u8>),
     Disconnect(String),
 }
@@ -17,13 +17,23 @@ pub struct Session {
     /// The address of the connection
     address: String,
     /// The packets that are queued, but not immediately sent.
-    packets: VecDeque<GamePacket>,
+    packets: VecDeque<Packet>,
     /// The sender to send packets to the client.
     /// This is a channel that is used to send packets to the client immediately.
     sender: Sender<SessionCommand>,
 }
 
 impl Session {
+    /// Create a new session for a new connection.
+    /// This will create a new sender to send packets to the client.
+    pub fn new(address: String) -> Self {
+        let (sender, receiver) = tokio::sync::mpsc::channel(100);
+        Self {
+            address,
+            packets: VecDeque::new(),
+            sender,
+        }
+    }
     /// Disconnect the session
     /// This will permanently remove the session from the server.
     pub async fn disconnect<T: Into<String>>(&self, reason: T) {
@@ -47,7 +57,7 @@ impl Session {
 
     /// Send a packet to the client
     /// If immediate is true, the packet will be sent immediately, completely skipping the queue.
-    pub fn send(&mut self, packet: GamePacket, immediate: bool) {
+    pub fn send(&mut self, packet: Packet, immediate: bool) {
         if immediate {
             self.sender.send(SessionCommand::Send(packet));
         } else {
