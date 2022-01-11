@@ -65,6 +65,7 @@ impl Session {
         }
     }
 
+	/// Immediately sends any buffer to the client
     pub fn send_stream(&self, stream: Vec<u8>) {
         self.sender.send(SessionCommand::SendStream(stream));
     }

@@ -44,7 +44,8 @@ impl Server {
         if let Err(e) = res {
             self.logger
                 .error(&format!("Failed to handle packet: {:?}", e));
-        }
+			player.session.disconnect("Failed to handle packet").await;
+		}
     }
 
     pub fn get_logger(&mut self) -> Logger {

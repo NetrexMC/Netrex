@@ -1,4 +1,3 @@
-#[feature(generic_associated_types)]
 pub mod handler;
 pub mod protocol;
 

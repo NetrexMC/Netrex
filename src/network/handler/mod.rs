@@ -7,6 +7,8 @@ use serde_json::Error as SerdeJsonError;
 
 use crate::player::Player;
 
+use self::login::LoginHandlerError;
+
 macro_rules! impl_err_handler {
     ($name: ident, $mtd: ident) => {
         impl From<$name> for HandlerError {
@@ -21,12 +23,14 @@ macro_rules! impl_err_handler {
 pub enum HandlerError {
     UnhandledPacket(String),
     PacketDecodeError,
+	LoginHandlerError(LoginHandlerError),
     BinaryError(BinaryError),
     SerdeJsonError(SerdeJsonError),
 }
 
 impl_err_handler!(String, UnhandledPacket);
 impl_err_handler!(BinaryError, BinaryError);
+impl_err_handler!(LoginHandlerError, LoginHandlerError);
 impl_err_handler!(SerdeJsonError, SerdeJsonError);
 
 /// Handlers for network interfaces.
