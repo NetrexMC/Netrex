@@ -1,9 +1,11 @@
 use crate::logger::Logger;
 use crate::network::protocol::compression::decompress;
-use crate::network::session::Session;
+use crate::network::session::{Session, SessionCommand};
 use crate::player::{Player, PlayerData};
 use binary_utils::*;
-use mcpe_protocol::interfaces::VarSlice;
+use mcpe_protocol::interfaces::{VarSlice, VarString};
+use mcpe_protocol::mcpe::Disconnect;
+use tokio::sync::mpsc::Sender;
 
 use byteorder::ReadBytesExt;
 use netrex_events::Channel;
@@ -17,6 +19,7 @@ pub struct Server {
     pub players: RwLock<HashMap<String, Player>>,
     pub logger: Logger,
     pub network: Option<Arc<RakNetServer>>,
+    pub session_send: Option<Arc<Sender<(String, SessionCommand)>>>,
 }
 
 impl Server {
@@ -25,6 +28,7 @@ impl Server {
             logger: Logger::new("Server".to_owned()),
             network: None,
             players: RwLock::new(HashMap::new()),
+            session_send: None,
         }
     }
 
@@ -34,7 +38,8 @@ impl Server {
             // create a new session for the player
             self.logger
                 .info(&format!("New player connected: {}", address));
-            let session = Session::new(address.clone());
+            let session =
+                Session::new(address.clone(), self.session_send.as_ref().unwrap().clone());
             let player = Player::new(session, PlayerData::unknown());
             lock.insert(address.clone(), player);
         }
@@ -44,8 +49,8 @@ impl Server {
         if let Err(e) = res {
             self.logger
                 .error(&format!("Failed to handle packet: {:?}", e));
-			player.session.disconnect("Failed to handle packet").await;
-		}
+            player.session.disconnect("Failed to handle packet").await;
+        }
     }
 
     pub fn get_logger(&mut self) -> Logger {
@@ -109,9 +114,80 @@ pub async fn start<Add: Into<String>>(s: Arc<Mutex<Server>>, address: Add) {
 
     channel.receive(&mut packet_listener);
 
-    let (task, server) = rakrs::start(raknet, channel).await;
+    let (task, server, channel) = rakrs::start(raknet, channel).await;
     s.lock().unwrap().network = Some(server);
 
+    let ticking_server = Arc::clone(&s);
+
     println!("Starting raknet??!");
-    task.await;
+    futures::join!(task, spawn_schedulers(ticking_server, channel));
+}
+
+pub async fn spawn_schedulers(
+    server: Arc<Mutex<Server>>,
+    channel: Sender<(String, Vec<u8>, bool)>,
+) {
+    let (send, mut reciever) = tokio::sync::mpsc::channel::<(String, SessionCommand)>(2048);
+    // tokio::spawn(async move {
+    // 	loop {
+
+    // 	}
+    // });
+    let mut serv = server.lock().unwrap();
+    let sending = Arc::new(send);
+    serv.session_send = Some(sending);
+    drop(serv);
+    loop {
+        if let Some(msg) = reciever.recv().await {
+            let serv = server.lock().unwrap();
+            let session = msg.0;
+            let command = msg.1;
+
+            match command {
+                SessionCommand::Disconnect(reason) => {
+                    // check if the player exists.
+                    if serv.players.read().unwrap().contains_key(&session) {
+                        // disconnect the player
+                        let mut lock = serv.players.write().expect("Failed to lock players");
+                        lock.remove(&session);
+                        drop(lock);
+
+                        let res = channel
+                            .send((
+                                session.clone(),
+                                Disconnect {
+                                    hide_screen: false,
+                                    message: VarString(reason),
+                                }
+                                .fparse(),
+                                true,
+                            ))
+                            .await;
+
+                        if let Err(e) = res {
+                            println!("Failed to send disconnect packet: {:?}", e);
+                        }
+                    }
+                }
+                SessionCommand::Send(_packet) => {
+                    if let Some(_player) = serv.players.write().unwrap().get_mut(&session) {
+                        // do batching here
+                    }
+                }
+                SessionCommand::SendStream(pk) => {
+                    if serv.players.read().unwrap().contains_key(&session) {
+                        // disconnect the player
+                        let res = channel.send((session.clone(), pk, true)).await;
+
+                        if let Err(e) = res {
+                            println!("Failed to send disconnect packet: {:?}", e);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        } else {
+            continue;
+        }
+    }
 }

@@ -23,7 +23,7 @@ macro_rules! impl_err_handler {
 pub enum HandlerError {
     UnhandledPacket(String),
     PacketDecodeError,
-	LoginHandlerError(LoginHandlerError),
+    LoginHandlerError(LoginHandlerError),
     BinaryError(BinaryError),
     SerdeJsonError(SerdeJsonError),
 }
