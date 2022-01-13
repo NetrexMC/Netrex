@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use binary_utils::{Streamable, LE};
 use jwt::{AlgorithmType, Header, Token, VerifyWithKey};
 use mcpe_protocol::interfaces::{LString32, VarSlice};
-use mcpe_protocol::mcpe::{Login, Packet, PacketId};
+use mcpe_protocol::mcpe::{Login, Packet, PacketId, PlayStatus};
 use serde_json::{Map, Value};
 
 use crate::network::session::Session;
@@ -117,6 +117,7 @@ impl PlayerHandler for LoginHandler {
         packet: mcpe_protocol::mcpe::Packet,
     ) -> Result<bool, super::HandlerError> {
         let login_data = Self::decode(packet.kind.into())?;
+		player.session.send_stream(PlayStatus::ServerFull.parse()?).await;
         Self::decode_prelogin(login_data)?;
         return Ok(false);
     }

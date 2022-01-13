@@ -33,21 +33,19 @@ impl Player {
         }
     }
 
-    pub async fn handle(&mut self, buffer: Vec<u8>) -> Result<(), HandlerError> {
-        let maybe_pk = Packet::compose(&buffer[..], &mut 0);
-
-        if let Ok(packet) = maybe_pk {
-            if LoginHandler::can_handle(packet.clone()) {
-                let res = LoginHandler::handle(self, packet.clone()).await?;
-                if res {
-                    return Ok(());
-                }
-            }
-            return Err(HandlerError::UnhandledPacket(packet.kind.into()));
-        } else {
-            return Err(HandlerError::PacketDecodeError);
-        }
+    pub async fn handle(&mut self, packet: Packet) -> Result<(), HandlerError> {
+		if LoginHandler::can_handle(packet.clone()) {
+			let res = LoginHandler::handle(self, packet.clone()).await?;
+			if res {
+				return Ok(());
+			}
+		}
+		return Err(HandlerError::UnhandledPacket(packet.kind.into()));
     }
+
+	pub async fn tick(&mut self) {
+		self.session.tick().await;
+	}
 }
 
 unsafe impl Send for Player {}

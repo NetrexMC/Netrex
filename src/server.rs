@@ -5,14 +5,17 @@ use crate::player::{Player, PlayerData};
 use binary_utils::*;
 use mcpe_protocol::interfaces::{VarSlice, VarString};
 use mcpe_protocol::mcpe::Disconnect;
+use mcpe_protocol::mcpe::Batch;
 use tokio::sync::mpsc::Sender;
 
 use byteorder::ReadBytesExt;
 use netrex_events::Channel;
 use rakrs::{RakEvent, RakNetServer, RakResult};
-use std::collections::HashMap;
+use tokio::time::sleep;
+use std::collections::{HashMap, VecDeque};
 use std::io::Cursor;
 use std::sync::{Arc, Mutex, RwLock};
+use std::time::Duration;
 
 pub struct Server {
     /// A Hashmap of players connected to the server.
@@ -45,12 +48,18 @@ impl Server {
         }
 
         let player = lock.get_mut(&address).expect("Failed to get player");
-        let res = player.handle(buffer).await;
-        if let Err(e) = res {
-            self.logger
-                .error(&format!("Failed to handle packet: {:?}", e));
-            player.session.disconnect("Failed to handle packet").await;
-        }
+		let batch = Batch::compose(&buffer, &mut 0);
+        if let Ok(batch) = batch {
+			for packet in batch.get_packets() {
+				let res = player.handle(packet).await;
+				if let Err(e) = res {
+					self.logger
+						.error(&format!("Failed to handle packet: {:?}", e));
+				}
+			}
+		} else {
+			self.logger.error(&format!("Failed to compose batch packet!"));
+		}
     }
 
     pub fn get_logger(&mut self) -> Logger {
@@ -66,8 +75,16 @@ pub async fn start<Add: Into<String>>(s: Arc<Mutex<Server>>, address: Add) {
     let mut packet_listener = |event: RakEvent, _: Option<RakResult>| -> Option<RakResult> {
         match event.clone() {
             RakEvent::Disconnect(address, reason) => {
-                logger
-                    .info(&format!("{} disconnected due to: {}", address, reason).to_string()[..]);
+				let mut serv = ref_server.lock().expect("not cool!");
+
+				let mut players = serv.players.write().unwrap();
+				if players.contains_key(&address) {
+					logger.info(&format!("{} disconnected due to: {}", address, reason));
+					players.remove(&address);
+				} else {
+					logger.warn(&format!("{} disconnected but did not have a player to associate with: {}", address, reason));
+				}
+
                 None
             }
             RakEvent::GamePacket(address, buf) => {
@@ -137,57 +154,104 @@ pub async fn spawn_schedulers(
     let sending = Arc::new(send);
     serv.session_send = Some(sending);
     drop(serv);
-    loop {
-        if let Some(msg) = reciever.recv().await {
-            let serv = server.lock().unwrap();
-            let session = msg.0;
-            let command = msg.1;
+    async {
+		let ticker_server = server.clone();
+		tokio::spawn(async move {
+			loop {
+				sleep(Duration::from_millis(50)).await;
+				let session_server = ticker_server.lock().unwrap();
+				let mut players = session_server.players.write().unwrap();
+				for (_, player) in players.iter_mut() {
+					futures_executor::block_on(player.tick());
+				}
+			}
+		});
+		loop {
+			if let Some(msg) = reciever.recv().await {
+				let serv = server.lock().unwrap();
+				let session = msg.0;
+				let command = msg.1;
+				println!("{:?}", command);
+				match command {
+					SessionCommand::Disconnect(reason) => {
+						// check if the player exists.
+						if serv.players.read().unwrap().contains_key(&session) {
+							// disconnect the player
+							let mut lock = serv.players.write().expect("Failed to lock players");
+							lock.remove(&session);
+							drop(lock);
 
-            match command {
-                SessionCommand::Disconnect(reason) => {
-                    // check if the player exists.
-                    if serv.players.read().unwrap().contains_key(&session) {
-                        // disconnect the player
-                        let mut lock = serv.players.write().expect("Failed to lock players");
-                        lock.remove(&session);
-                        drop(lock);
+							let mut batch = Batch::new(255);
+							batch.add(Disconnect {
+								hide_screen: false,
+								message: VarString(reason),
+							}.into());
+							let res = channel
+								.send((
+									session.clone(),
+									batch.fparse(),
+									true,
+								))
+								.await;
 
-                        let res = channel
-                            .send((
-                                session.clone(),
-                                Disconnect {
-                                    hide_screen: false,
-                                    message: VarString(reason),
-                                }
-                                .fparse(),
-                                true,
-                            ))
-                            .await;
+							if let Err(e) = res {
+								println!("Failed to send disconnect packet: {:?}", e);
+							}
+						}
+					}
+					SessionCommand::Send(packet) => {
+						if let Some(_player) = serv.players.write().unwrap().get_mut(&session) {
+							let mut batch = Batch::new(255);
+							batch.add(packet.into());
 
-                        if let Err(e) = res {
-                            println!("Failed to send disconnect packet: {:?}", e);
-                        }
-                    }
-                }
-                SessionCommand::Send(_packet) => {
-                    if let Some(_player) = serv.players.write().unwrap().get_mut(&session) {
-                        // do batching here
-                    }
-                }
-                SessionCommand::SendStream(pk) => {
-                    if serv.players.read().unwrap().contains_key(&session) {
-                        // disconnect the player
-                        let res = channel.send((session.clone(), pk, true)).await;
+							let res = channel.send((session.clone(), batch.fparse(), false)).await;
 
-                        if let Err(e) = res {
-                            println!("Failed to send disconnect packet: {:?}", e);
-                        }
-                    }
-                }
-                _ => {}
-            }
-        } else {
-            continue;
-        }
-    }
+							if let Err(e) = res {
+								println!("Failed to send packet: {:?}", e);
+							}
+						}
+					}
+					SessionCommand::SendBlk(mut packets, instant) => {
+						if let Some(_player) = serv.players.write().unwrap().get_mut(&session) {
+							let mut batches: VecDeque<Batch> = VecDeque::new();
+							let mut current_batch = Batch::new(255);
+
+							// this is easier on the memory usage
+							let pks = packets.drain(..);
+
+							for packet in pks {
+								if current_batch.get_remaining() == 0 {
+									batches.push_back(current_batch);
+									current_batch = Batch::new(255);
+								} else {
+									current_batch.add(packet.into());
+								}
+							}
+
+							for batch in batches {
+								let res = channel.send((session.clone(), batch.fparse(), instant)).await;
+
+								if let Err(e) = res {
+									println!("Failed to send packet: {:?}", e);
+								}
+							}
+						}
+					}
+					SessionCommand::SendStream(pk) => {
+						if serv.players.read().unwrap().contains_key(&session) {
+							// disconnect the player
+							let res = channel.send((session.clone(), pk, true)).await;
+
+							if let Err(e) = res {
+								println!("Failed to send disconnect packet: {:?}", e);
+							}
+						}
+					}
+					_ => {}
+				}
+			} else {
+				continue;
+			}
+		}
+    }.await;
 }

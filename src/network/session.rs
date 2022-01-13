@@ -5,8 +5,12 @@ use tokio::sync::mpsc::{error::SendError, Sender};
 
 #[derive(Debug, Clone)]
 pub enum SessionCommand {
-    /// Not immediate
+    /// While not entirely immediate,
+	/// this command is used to send packets to the player.
     Send(Packet),
+	/// Sends all packets in the queue to the player
+	/// A tuple of `(Packets, Instant?)`
+	SendBlk(VecDeque<Packet>, bool),
     /// Immediate
     SendStream(Vec<u8>),
     /// Immediate
@@ -50,11 +54,10 @@ impl Session {
         // foreach packet in the packets queue, send it.
         // Packets should be batched and compressed here, but for now,
         // We just send them all at once.
-        for packet in self.packets.clone().drain(..) {
-            // we don't care about this error.
-            self.dispatch(SessionCommand::Send(packet)).await;
-        }
-        self.packets.clear();
+		if self.packets.len() != 0 {
+			self.dispatch(SessionCommand::SendBlk(self.packets.clone(), false)).await;
+			self.packets.clear();
+		}
     }
 
     /// Send a packet to the client
