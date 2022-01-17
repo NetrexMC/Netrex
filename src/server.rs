@@ -1,5 +1,6 @@
 use crate::logger::Logger;
 use crate::network::protocol::compression::decompress;
+use crate::network::protocol::compression::compress;
 use crate::network::session::{Session, SessionCommand};
 use crate::player::{Player, PlayerData};
 use binary_utils::*;
@@ -21,7 +22,7 @@ use std::time::Duration;
 macro_rules! make_batch {
 	($batch: expr) => {{
 		let mut buffer: Vec<u8> = vec![254];
-		buffer.write_all(&$batch.fparse()).unwrap();
+		buffer.write_all(&compress(&mut $batch.fparse()).unwrap()).unwrap();
 		buffer
 	}}
 }
