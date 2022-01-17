@@ -1,0 +1,18 @@
+[package]
+name = "rakrs"
+version = "0.2.2"
+authors = ["Bavfalcon9"]
+edition = "2021"
+
+[features]
+default = []
+dbg = []
+dbg-verbose = []
+
+[dependencies]
+rand = "0.8.3"
+binary_utils = { git = "https://github.com/NetrexMC/BinaryUtil", tag = "v0.2.1" }
+netrex_events = { git = "https://github.com/NetrexMC/Events", branch = "master" }
+tokio = { version = "1.15.0", features = ["full"] }
+byteorder = "1.4.3"
+futures = "0.3.19"

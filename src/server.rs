@@ -14,8 +14,17 @@ use rakrs::{RakEvent, RakNetServer, RakResult};
 use tokio::time::sleep;
 use std::collections::{HashMap, VecDeque};
 use std::io::Cursor;
+use std::io::Write;
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::Duration;
+
+macro_rules! make_batch {
+	($batch: expr) => {{
+		let mut buffer: Vec<u8> = vec![254];
+		buffer.write_all(&$batch.fparse()).unwrap();
+		buffer
+	}}
+}
 
 pub struct Server {
     /// A Hashmap of players connected to the server.
@@ -58,7 +67,7 @@ impl Server {
 				}
 			}
 		} else {
-			self.logger.error(&format!("Failed to compose batch packet!"));
+			self.logger.error(&format!("Failed to compose batch packet! {:?}", batch.err().unwrap()));
 		}
     }
 
@@ -75,7 +84,7 @@ pub async fn start<Add: Into<String>>(s: Arc<Mutex<Server>>, address: Add) {
     let mut packet_listener = |event: RakEvent, _: Option<RakResult>| -> Option<RakResult> {
         match event.clone() {
             RakEvent::Disconnect(address, reason) => {
-				let mut serv = ref_server.lock().expect("not cool!");
+				let serv = ref_server.lock().expect("not cool!");
 
 				let mut players = serv.players.write().unwrap();
 				if players.contains_key(&address) {
@@ -90,8 +99,10 @@ pub async fn start<Add: Into<String>>(s: Arc<Mutex<Server>>, address: Add) {
             RakEvent::GamePacket(address, buf) => {
                 let mut buffer = buf.clone();
                 let mut stream = Cursor::new(&mut buffer);
-                stream.read_u8().unwrap();
+                let id = stream.read_u8().unwrap();
                 let result = decompress(&buffer[1..]);
+
+				println!("{}", id);
 
                 if result.is_err() {
                     println!(
@@ -189,7 +200,7 @@ pub async fn spawn_schedulers(
 							let res = channel
 								.send((
 									session.clone(),
-									batch.fparse(),
+									make_batch!(batch),
 									true,
 								))
 								.await;
@@ -204,7 +215,7 @@ pub async fn spawn_schedulers(
 							let mut batch = Batch::new(255);
 							batch.add(packet.into());
 
-							let res = channel.send((session.clone(), batch.fparse(), false)).await;
+							let res = channel.send((session.clone(), make_batch!(batch), true)).await;
 
 							if let Err(e) = res {
 								println!("Failed to send packet: {:?}", e);
@@ -229,7 +240,7 @@ pub async fn spawn_schedulers(
 							}
 
 							for batch in batches {
-								let res = channel.send((session.clone(), batch.fparse(), instant)).await;
+								let res = channel.send((session.clone(), make_batch!(batch), instant)).await;
 
 								if let Err(e) = res {
 									println!("Failed to send packet: {:?}", e);
