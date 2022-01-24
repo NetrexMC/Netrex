@@ -117,7 +117,7 @@ impl PlayerHandler for LoginHandler {
         packet: mcpe_protocol::mcpe::Packet,
     ) -> Result<bool, super::HandlerError> {
         let login_data = Self::decode(packet.kind.into())?;
-		player.session.send(PlayStatus::ServerFull.into(), true).await;
+        player.send(PlayStatus::FailedClient.into(), true).await;
         Self::decode_prelogin(login_data)?;
         return Ok(false);
     }

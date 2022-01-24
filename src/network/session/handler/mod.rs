@@ -1,4 +1,7 @@
 pub mod login;
+pub mod raw;
+
+use std::io::Error as IoError;
 
 use async_trait::async_trait;
 use binary_utils::error::BinaryError;
@@ -7,7 +10,7 @@ use serde_json::Error as SerdeJsonError;
 
 use crate::player::Player;
 
-use self::login::LoginHandlerError;
+use self::{login::LoginHandlerError, raw::RawHandlerError};
 
 macro_rules! impl_err_handler {
     ($name: ident, $mtd: ident) => {
@@ -24,14 +27,18 @@ pub enum HandlerError {
     UnhandledPacket(String),
     PacketDecodeError,
     LoginHandlerError(LoginHandlerError),
+    RawHandlerError(RawHandlerError),
     BinaryError(BinaryError),
     SerdeJsonError(SerdeJsonError),
+    IoError(IoError),
 }
 
 impl_err_handler!(String, UnhandledPacket);
 impl_err_handler!(BinaryError, BinaryError);
 impl_err_handler!(LoginHandlerError, LoginHandlerError);
+impl_err_handler!(RawHandlerError, RawHandlerError);
 impl_err_handler!(SerdeJsonError, SerdeJsonError);
+impl_err_handler!(IoError, IoError);
 
 /// Handlers for network interfaces.
 /// A handler is a function that takes a packet and, well

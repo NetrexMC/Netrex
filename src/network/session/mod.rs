@@ -1,16 +1,21 @@
+pub mod handler;
+
 use std::{collections::VecDeque, sync::Arc};
 
+use async_trait::async_trait;
 use mcpe_protocol::mcpe::Packet;
 use tokio::sync::mpsc::{error::SendError, Sender};
+
+use self::handler::{raw::RawHandler, HandlerError};
 
 #[derive(Debug, Clone)]
 pub enum SessionCommand {
     /// While not entirely immediate,
-	/// this command is used to send packets to the player.
+    /// this command is used to send packets to the player.
     Send(Packet),
-	/// Sends all packets in the queue to the player
-	/// A tuple of `(Packets, Instant?)`
-	SendBlk(VecDeque<Packet>, bool),
+    /// Sends all packets in the queue to the player
+    /// A tuple of `(Packets, Instant?)`
+    SendBlk(VecDeque<Packet>, bool),
     /// Immediate
     SendStream(Vec<u8>),
     /// Immediate
@@ -54,10 +59,11 @@ impl Session {
         // foreach packet in the packets queue, send it.
         // Packets should be batched and compressed here, but for now,
         // We just send them all at once.
-		if self.packets.len() != 0 {
-			self.dispatch(SessionCommand::SendBlk(self.packets.clone(), false)).await;
-			self.packets.clear();
-		}
+        if self.packets.len() != 0 {
+            self.dispatch(SessionCommand::SendBlk(self.packets.clone(), false))
+                .await;
+            self.packets.clear();
+        }
     }
 
     /// Send a packet to the client
@@ -79,10 +85,34 @@ impl Session {
         self.address.clone()
     }
 
+    /// Handles a raw payload and retrieves a packet from it.
+    pub async fn handle_raw(
+        &self,
+        interface: &mut dyn SessionInterface,
+        buffer: Vec<u8>,
+    ) -> Result<(), HandlerError> {
+        if let Ok(batch) = RawHandler::recv(buffer).await {
+            for packet in batch.get_packets() {
+                interface.on_packet(packet).await?;
+            }
+        }
+
+        Ok(())
+    }
+
     async fn dispatch(
         &self,
         command: SessionCommand,
     ) -> Result<(), SendError<(String, SessionCommand)>> {
         return self.sender.send((self.address.clone(), command)).await;
     }
+}
+
+/// This trait is used to implement multiple interfaces for a Session.
+/// Each interface must be able to handle packets from a session.
+#[async_trait]
+pub trait SessionInterface {
+    /// Handles a packet from a session.
+    /// This is called every time a packet is received from the session.
+    async fn on_packet(&mut self, packet: Packet) -> Result<(), HandlerError>;
 }

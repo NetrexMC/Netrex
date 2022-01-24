@@ -1,4 +1,3 @@
-pub mod handler;
 pub mod protocol;
 
 #[allow(unused_must_use)]

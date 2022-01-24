@@ -1,9 +1,15 @@
+use std::sync::Arc;
+
+use async_trait::async_trait;
 use binary_utils::Streamable;
 use mcpe_protocol::mcpe::Packet;
 
 use crate::network::{
-    handler::{login::LoginHandler, CanHandle, HandlerError, PlayerHandler},
     session::Session,
+    session::{
+        handler::{login::LoginHandler, CanHandle, HandlerError, PlayerHandler},
+        SessionInterface,
+    },
 };
 
 pub mod skin;
@@ -19,13 +25,13 @@ impl PlayerData {
     }
 }
 pub struct Player {
-    pub(crate) session: Session,
+    pub(crate) session: Arc<Session>,
     pub(crate) name: String,
     pub(crate) display_name: String,
 }
 
 impl Player {
-    pub fn new(session: Session, data: PlayerData) -> Self {
+    pub fn new(session: Arc<Session>, data: PlayerData) -> Self {
         Player {
             session,
             name: "".to_string(),
@@ -33,19 +39,37 @@ impl Player {
         }
     }
 
-    pub async fn handle(&mut self, packet: Packet) -> Result<(), HandlerError> {
-		if LoginHandler::can_handle(packet.clone()) {
-			let res = LoginHandler::handle(self, packet.clone()).await?;
-			if res {
-				return Ok(());
-			}
-		}
-		return Err(HandlerError::UnhandledPacket(packet.kind.into()));
+    pub async fn handle_raw(&mut self, packet: Vec<u8>) -> Result<(), HandlerError> {
+        let mut a = self.session.clone();
+        let session = Arc::get_mut(&mut a).unwrap();
+        session.handle_raw(self, packet).await;
+        Ok(())
     }
 
-	pub async fn tick(&mut self) {
-		self.session.tick().await;
-	}
+    pub async fn send(&mut self, packet: Packet, immediate: bool) {
+        let mut a = self.session.clone();
+        let session = Arc::get_mut(&mut a).unwrap();
+        session.send(packet, immediate);
+    }
+
+    pub async fn tick(&mut self) {
+        let mut a = self.session.clone();
+        let session = Arc::get_mut(&mut a).unwrap();
+        session.tick().await;
+    }
+}
+
+#[async_trait]
+impl SessionInterface for Player {
+    async fn on_packet(&mut self, packet: Packet) -> Result<(), HandlerError> {
+        if LoginHandler::can_handle(packet.clone()) {
+            let res = LoginHandler::handle(self, packet.clone()).await?;
+            if res {
+                return Ok(());
+            }
+        }
+        return Err(HandlerError::UnhandledPacket(packet.kind.into()));
+    }
 }
 
 unsafe impl Send for Player {}

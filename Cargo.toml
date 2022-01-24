@@ -10,7 +10,7 @@ edition = "2021"
 # Hard depend on binary_utils
 binary_utils = { git = "https://github.com/NetrexMC/BinaryUtil", branch = "master" }
 flate2 = { version = "1.0.22", features = ["zlib"] }
-rakrs = { git = "https://github.com/NetrexMC/RakNet", branch = "master", features = ["dbg", "dbg-verbose"] }
+rakrs = { git = "https://github.com/NetrexMC/RakNet", branch = "v2", features = ["mcpe"] }
 # rakrs = { path = "./rakrs", features = ["dbg", "dbg-verbose"] } # doing this to save commits, and to make it easier to test
 netrex_events = { git = "https://github.com/NetrexMC/Events", branch = "master" }
 mcpe_protocol = { git = "https://github.com/NetrexMC/Protocol", branch = "master" }

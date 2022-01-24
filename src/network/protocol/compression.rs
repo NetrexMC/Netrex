@@ -1,5 +1,5 @@
 use flate2::read::DeflateDecoder;
-use flate2::write::DeflateEncoder;
+use flate2::write::ZlibEncoder;
 use flate2::Compression;
 use std::io;
 use std::io::prelude::*;
@@ -15,7 +15,7 @@ pub fn decompress(raw_buf: &[u8]) -> io::Result<Vec<u8>> {
 }
 
 pub fn compress(buf: &mut [u8]) -> io::Result<Vec<u8>> {
-    let mut writer = DeflateEncoder::new(Vec::new(), Compression::best());
+    let mut writer = ZlibEncoder::new(Vec::new(), Compression::new(1));
     let written = writer.write_all(buf);
     if written.is_err() {
         Err(written.unwrap_err())
