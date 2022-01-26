@@ -49,8 +49,6 @@ impl RawHandler {
         }
 
         let decompressed = decompress_res?;
-
-        println!("{:?}", &decompressed[..40]);
         // Get the packets from the buffer.
         let batched = Batch::compose(&decompressed[..], &mut 0)?;
 

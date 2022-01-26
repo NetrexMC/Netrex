@@ -127,11 +127,11 @@ impl PlayerHandler for LoginHandler {
         player: &mut Player,
         packet: mcpe_protocol::mcpe::Packet,
     ) -> Result<bool, super::HandlerError> {
-        // player.send(PlayStatus::FailedClient.into(), true).await;
+        player.send(PlayStatus::Success.into(), true).await;
         // fuck this shit
         // write the stream manually
-        let buf: &[u8] = &[254, 0, 6, 0, 249, 255, 5, 2, 0, 0, 0, 1, 3, 0];
-        player.session.send_stream(buf.to_vec()).await;
+        // let buf: &[u8] = &[254, 0, 6, 0, 249, 255, 5, 2, 0, 0, 0, 1, 3, 0];
+        // player.session.send_stream(buf.to_vec()).await;
         let login_data = Self::decode(packet.kind.into())?;
         Self::decode_prelogin(login_data)?;
         return Ok(false);
