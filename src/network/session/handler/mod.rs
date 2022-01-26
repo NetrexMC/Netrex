@@ -25,6 +25,7 @@ macro_rules! impl_err_handler {
 #[derive(Debug)]
 pub enum HandlerError {
     UnhandledPacket(String),
+    UnknownError(String),
     PacketDecodeError,
     LoginHandlerError(LoginHandlerError),
     RawHandlerError(RawHandlerError),
@@ -33,6 +34,20 @@ pub enum HandlerError {
     IoError(IoError),
 }
 
+impl std::fmt::Display for HandlerError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            HandlerError::UnhandledPacket(name) => write!(f, "Unhandled packet: {}", name),
+            HandlerError::UnknownError(name) => write!(f, "Unknown error: {}", name),
+            HandlerError::PacketDecodeError => write!(f, "Packet decode error"),
+            HandlerError::LoginHandlerError(err) => write!(f, "Login handler error: {:?}", err),
+            HandlerError::RawHandlerError(err) => write!(f, "Raw handler error: {:?}", err),
+            HandlerError::BinaryError(err) => write!(f, "Binary error: {}", err),
+            HandlerError::SerdeJsonError(err) => write!(f, "Serde json error: {}", err),
+            HandlerError::IoError(err) => write!(f, "Io error: {}", err),
+        }
+    }
+}
 impl_err_handler!(String, UnhandledPacket);
 impl_err_handler!(BinaryError, BinaryError);
 impl_err_handler!(LoginHandlerError, LoginHandlerError);

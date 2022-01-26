@@ -70,7 +70,10 @@ impl Session {
     /// If immediate is true, the packet will be sent immediately, completely skipping the queue.
     pub async fn send(&mut self, packet: Packet, immediate: bool) {
         if immediate {
-            self.dispatch(SessionCommand::Send(packet)).await;
+            let to_send = RawHandler::send(vec![packet]).await.unwrap();
+            for pk in to_send {
+                self.dispatch(SessionCommand::SendStream(pk)).await;
+            }
         } else {
             self.packets.push_back(packet);
         }
@@ -87,15 +90,19 @@ impl Session {
 
     /// Handles a raw payload and retrieves a packet from it.
     pub async fn handle_raw(
-        &self,
         interface: &mut dyn SessionInterface,
         buffer: Vec<u8>,
     ) -> Result<(), HandlerError> {
-        if let Ok(batch) = RawHandler::recv(buffer).await {
-            for packet in batch.get_packets() {
-                interface.on_packet(packet).await?;
+        match RawHandler::recv(buffer).await {
+            Ok(batch) => {
+                for packet in batch.get_packets() {
+                    interface.on_packet(packet).await?;
+                }
             }
-        }
+            Err(e) => {
+                return Err(e);
+            }
+        };
 
         Ok(())
     }

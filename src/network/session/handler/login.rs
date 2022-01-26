@@ -1,10 +1,12 @@
 use std::fs::{File, OpenOptions};
-use std::io::Write;
+use std::io::{Cursor, Write};
 
 use async_trait::async_trait;
-use binary_utils::{Streamable, LE};
+use binary_utils::io::BinaryReader;
+use binary_utils::{Streamable, VarInt, LE};
+use byteorder::LittleEndian;
 use jwt::{AlgorithmType, Header, Token, VerifyWithKey};
-use mcpe_protocol::interfaces::{LString32, VarSlice};
+use mcpe_protocol::interfaces::{LString32, String32, VarSlice};
 use mcpe_protocol::mcpe::{Login, Packet, PacketId, PlayStatus};
 use serde_json::{Map, Value};
 
@@ -44,11 +46,20 @@ pub struct LoginHandler;
 impl LoginHandler {
     pub fn decode(packet: Login) -> Result<PreLoginData, HandlerError> {
         let protocol = packet.protocol;
-        let data = packet.request_data.0; // make this little endian
-        let chain_raw = VarSlice::fcompose(&data[..], &mut 0);
-        let mut pos: usize = 0;
-        let chain_data = serde_json::from_str(&LString32::fcompose(&chain_raw.0[..], &mut pos).0)?;
-        let client_data = LString32::fcompose(&chain_raw.0[..], &mut pos).0;
+        let raw_data = packet.request_data.0;
+
+        let mut position: usize = 0;
+        let length = VarInt::<u32>::compose(&raw_data, &mut position)?;
+
+        let data = &raw_data[..];
+        let mut stream = Cursor::new(&data);
+
+        let v = stream.read_string_u32::<LittleEndian>()?;
+
+        let client_data = stream.read_string_u32::<LittleEndian>()?;
+        let chain_data = serde_json::from_str(&v)?;
+
+        // read LE lengthed string.
 
         return Ok(PreLoginData {
             protocol,
@@ -116,8 +127,12 @@ impl PlayerHandler for LoginHandler {
         player: &mut Player,
         packet: mcpe_protocol::mcpe::Packet,
     ) -> Result<bool, super::HandlerError> {
+        // player.send(PlayStatus::FailedClient.into(), true).await;
+        // fuck this shit
+        // write the stream manually
+        let buf: &[u8] = &[254, 0, 6, 0, 249, 255, 5, 2, 0, 0, 0, 1, 3, 0];
+        player.session.send_stream(buf.to_vec()).await;
         let login_data = Self::decode(packet.kind.into())?;
-        player.send(PlayStatus::FailedClient.into(), true).await;
         Self::decode_prelogin(login_data)?;
         return Ok(false);
     }

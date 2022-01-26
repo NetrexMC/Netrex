@@ -25,13 +25,13 @@ impl PlayerData {
     }
 }
 pub struct Player {
-    pub(crate) session: Arc<Session>,
+    pub(crate) session: Session,
     pub(crate) name: String,
     pub(crate) display_name: String,
 }
 
 impl Player {
-    pub fn new(session: Arc<Session>, data: PlayerData) -> Self {
+    pub fn new(session: Session, data: PlayerData) -> Self {
         Player {
             session,
             name: "".to_string(),
@@ -40,22 +40,16 @@ impl Player {
     }
 
     pub async fn handle_raw(&mut self, packet: Vec<u8>) -> Result<(), HandlerError> {
-        let mut a = self.session.clone();
-        let session = Arc::get_mut(&mut a).unwrap();
-        session.handle_raw(self, packet).await;
+        Session::handle_raw(self, packet).await?;
         Ok(())
     }
 
     pub async fn send(&mut self, packet: Packet, immediate: bool) {
-        let mut a = self.session.clone();
-        let session = Arc::get_mut(&mut a).unwrap();
-        session.send(packet, immediate);
+        self.session.send(packet, immediate).await;
     }
 
     pub async fn tick(&mut self) {
-        let mut a = self.session.clone();
-        let session = Arc::get_mut(&mut a).unwrap();
-        session.tick().await;
+        self.session.tick().await;
     }
 }
 

@@ -28,8 +28,8 @@ pub struct RawHandler;
 impl RawHandler {
     /// This function is called the moment any buffer is recieved from
     /// the client. It will decode the buffer and return a batched packet.
-    pub async fn recv(mut buffer: Vec<u8>) -> Result<Batch, HandlerError> {
-        let mut stream = Cursor::new(&mut buffer);
+    pub async fn recv(buffer: Vec<u8>) -> Result<Batch, HandlerError> {
+        let mut stream = Cursor::new(buffer.clone());
 
         if stream.read_u8()? != 254 {
             // This is not a minecraft packet!
@@ -39,8 +39,18 @@ impl RawHandler {
 
         // Lets decompress the buffer.
         let game_buffer = &buffer[1..];
-        let decompressed = decompress(&game_buffer)?;
+        let decompress_res = decompress(&game_buffer);
 
+        if let Err(err) = decompress_res {
+            return Err(HandlerError::UnknownError(format!(
+                "Decompression error: {}",
+                err
+            )));
+        }
+
+        let decompressed = decompress_res?;
+
+        println!("{:?}", &decompressed[..40]);
         // Get the packets from the buffer.
         let batched = Batch::compose(&decompressed[..], &mut 0)?;
 
@@ -49,7 +59,7 @@ impl RawHandler {
             return Err(RawHandlerError::PacketLimitExceeded.into());
         }
 
-        Ok(Batch::new(255))
+        Ok(batched)
     }
 
     /// This will process and "batch" every packet in the queue.
@@ -68,6 +78,8 @@ impl RawHandler {
                 let compressed = compress(&mut buffer[..])?;
                 // add the compressed buffer to the batches.
                 batches.push(Self::write_header(compressed));
+                // batches.push(compress(&mut Self::write_header(buffer)[..])?);
+
                 // reset the current batch
                 current_batch = Batch::new(255);
             }
@@ -78,7 +90,12 @@ impl RawHandler {
         // parse the last batch.
         let mut buffer = current_batch.parse()?;
         let compressed = compress(&mut buffer[..])?;
+        println!(
+            "\nDecompressed data for memes: {:?}\n\n",
+            decompress(&compressed[..])
+        );
         batches.push(Self::write_header(compressed));
+        // batches.push(compress(&mut Self::write_header(buffer)[..])?);
 
         Ok(batches)
     }

@@ -34,7 +34,6 @@ macro_rules! make_batch {
 pub struct Server {
     /// A Hashmap of players connected to the server.
     pub players: RwLock<HashMap<String, Player>>,
-    pub sessions: HashMap<String, Arc<Session>>,
     pub logger: Logger,
     pub network: Option<Arc<RakNetServer>>,
     pub session_send: Option<Arc<Sender<(String, SessionCommand)>>>,
@@ -46,45 +45,34 @@ impl Server {
             logger: Logger::new("Server".to_owned()),
             network: None,
             players: RwLock::new(HashMap::new()),
-            sessions: HashMap::new(),
             session_send: None,
         }
     }
 
     pub async fn receive(&mut self, address: String, buffer: Vec<u8>) {
         // this is a bit hacky but it works
-        let session = self.get_session(address.clone());
         let mut lock = self.players.write().expect("Failed to lock players");
         if !lock.contains_key(&address) {
             // create a new session for the player
             self.logger
                 .info(&format!("New player connected: {}", address));
+            let sender = self.session_send.as_ref().unwrap().clone();
+            let session = Session::new(address.clone(), sender);
             let player = Player::new(session, PlayerData::unknown());
             lock.insert(address.clone(), player);
         }
 
         let player = lock.get_mut(&address).expect("Failed to get player");
         // handle the packet through the players session
-        player.handle_raw(buffer).await;
+        let handled = player.handle_raw(buffer.clone()).await;
+
+        if let Err(e) = handled {
+            println!("[{}] Could not handle a packet from player! {}", address, e);
+        }
     }
 
     pub fn get_logger(&mut self) -> Logger {
         self.logger.clone()
-    }
-
-    /// creates a session on the server and returns the reference arc to that session. (without holding the lock)
-    fn get_session(&mut self, address: String) -> Arc<Session> {
-        if self.sessions.contains_key(&address) {
-            return self.sessions.get(&address).unwrap().clone();
-        } else {
-            let session = Arc::new(Session::new(
-                address.clone(),
-                self.session_send.as_ref().unwrap().clone(),
-            ));
-            let session_arc = session.clone();
-            self.sessions.insert(address, session);
-            session_arc
-        }
     }
 }
 
@@ -132,6 +120,7 @@ pub async fn start<Add: Into<String>>(s: Arc<Mutex<Server>>, address: Add) {
     futures::join!(task, spawn_schedulers(ticking_server, channel));
 }
 
+// todo clean this mess up it's stinky.
 pub async fn spawn_schedulers(
     server: Arc<Mutex<Server>>,
     channel: Sender<(String, Vec<u8>, bool)>,
