@@ -152,7 +152,6 @@ pub async fn spawn_schedulers(
                 let serv = server.lock().unwrap();
                 let session = msg.0;
                 let command = msg.1;
-                println!("[{}] sending command {:?}", session, command);
                 match command {
                     SessionCommand::Disconnect(reason) => {
                         // check if the player exists.
