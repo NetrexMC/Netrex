@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use binary_utils::Streamable;
-use mcpe_protocol::mcpe::Packet;
+use mcpe_protocol::interfaces::VarString;
+use mcpe_protocol::mcpe::{Disconnect, Packet};
 
 use crate::network::{
     session::Session,
@@ -42,6 +43,10 @@ impl Player {
     pub async fn handle_raw(&mut self, packet: Vec<u8>) -> Result<(), HandlerError> {
         Session::handle_raw(self, packet).await?;
         Ok(())
+    }
+
+    pub async fn disconnect<S: Into<String>>(&mut self, reason: S) {
+        self.session.disconnect(reason).await;
     }
 
     pub async fn send(&mut self, packet: Packet, immediate: bool) {

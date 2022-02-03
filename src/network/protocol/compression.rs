@@ -1,5 +1,5 @@
 use flate2::read::{DeflateDecoder, ZlibDecoder};
-use flate2::write::{DeflateEncoder, ZlibEncoder};
+use flate2::write::DeflateEncoder;
 use flate2::Compression;
 use std::io;
 use std::io::prelude::*;
@@ -11,7 +11,6 @@ pub fn decompress(raw_buf: &[u8]) -> io::Result<Vec<u8>> {
         Ok(_) => Ok(ret_data.clone()),
         Err(v) => {
             // try zlib
-            println!("that failed, trying zlib...");
             let mut reader = ZlibDecoder::new_with_buf(raw_buf, vec![0; 2 * 1024 * 1024]);
             match reader.read_to_end(&mut ret_data) {
                 Ok(_) => Ok(ret_data.clone()),

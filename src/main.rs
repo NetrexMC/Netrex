@@ -1,3 +1,4 @@
+#![feature(option_result_contains)]
 pub mod logger;
 pub mod network;
 pub mod player;

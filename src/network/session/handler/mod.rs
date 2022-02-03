@@ -34,6 +34,64 @@ pub enum HandlerError {
     IoError(IoError),
 }
 
+impl HandlerError {
+    pub fn is_login_error(&self) -> bool {
+        match self {
+            HandlerError::LoginHandlerError(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_raw_error(&self) -> bool {
+        match self {
+            HandlerError::RawHandlerError(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_binary_error(&self) -> bool {
+        match self {
+            HandlerError::BinaryError(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_serde_json_error(&self) -> bool {
+        match self {
+            HandlerError::SerdeJsonError(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_io_error(&self) -> bool {
+        match self {
+            HandlerError::IoError(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_unknown_error(&self) -> bool {
+        match self {
+            HandlerError::UnknownError(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_packet_decode_error(&self) -> bool {
+        match self {
+            HandlerError::PacketDecodeError => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_unhandled_packet(&self) -> bool {
+        match self {
+            HandlerError::UnhandledPacket(_) => true,
+            _ => false,
+        }
+    }
+}
+
 impl std::fmt::Display for HandlerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

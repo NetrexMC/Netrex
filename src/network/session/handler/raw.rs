@@ -76,7 +76,6 @@ impl RawHandler {
                 let compressed = compress(&mut buffer[..])?;
                 // add the compressed buffer to the batches.
                 batches.push(Self::write_header(compressed));
-                // batches.push(compress(&mut Self::write_header(buffer)[..])?);
 
                 // reset the current batch
                 current_batch = Batch::new(255);
@@ -88,13 +87,7 @@ impl RawHandler {
         // parse the last batch.
         let mut buffer = current_batch.parse()?;
         let compressed = compress(&mut buffer[..])?;
-        println!(
-            "\nDecompressed data for memes: {:?}\n\n",
-            decompress(&compressed[..])
-        );
         batches.push(Self::write_header(compressed));
-        // batches.push(compress(&mut Self::write_header(buffer)[..])?);
-
         Ok(batches)
     }
 
