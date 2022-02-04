@@ -95,14 +95,14 @@ impl HandlerError {
 impl std::fmt::Display for HandlerError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            HandlerError::UnhandledPacket(name) => write!(f, "Unhandled packet: {}", name),
-            HandlerError::UnknownError(name) => write!(f, "Unknown error: {}", name),
-            HandlerError::PacketDecodeError => write!(f, "Packet decode error"),
-            HandlerError::LoginHandlerError(err) => write!(f, "Login handler error: {:?}", err),
-            HandlerError::RawHandlerError(err) => write!(f, "Raw handler error: {:?}", err),
-            HandlerError::BinaryError(err) => write!(f, "Binary error: {}", err),
-            HandlerError::SerdeJsonError(err) => write!(f, "Serde json error: {}", err),
-            HandlerError::IoError(err) => write!(f, "Io error: {}", err),
+            HandlerError::UnhandledPacket(name) => write!(f, "Unhandled Packet: {}", name),
+            HandlerError::UnknownError(name) => write!(f, "Unknown Error: {}", name),
+            HandlerError::PacketDecodeError => write!(f, "Packet Decode Error"),
+            HandlerError::LoginHandlerError(err) => write!(f, "Login Error: {:?}", err),
+            HandlerError::RawHandlerError(err) => write!(f, "Raw Error: {:?}", err),
+            HandlerError::BinaryError(err) => write!(f, "Binary Error: {}", err),
+            HandlerError::SerdeJsonError(err) => write!(f, "Serde json Error: {}", err),
+            HandlerError::IoError(err) => write!(f, "Io Error: {}", err),
         }
     }
 }

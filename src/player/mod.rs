@@ -46,11 +46,17 @@ impl Player {
     }
 
     pub async fn disconnect<S: Into<String>>(&mut self, reason: S) {
+		let reason: String = reason.into();
+		self.send(Disconnect {
+			hide_screen: false,
+			message: VarString(reason.clone()),
+		}, true).await;
+
         self.session.disconnect(reason).await;
     }
 
-    pub async fn send(&mut self, packet: Packet, immediate: bool) {
-        self.session.send(packet, immediate).await;
+    pub async fn send<P: Into<Packet>>(&mut self, packet: P, immediate: bool) {
+        self.session.send(packet.into(), immediate).await;
     }
 
     pub async fn tick(&mut self) {

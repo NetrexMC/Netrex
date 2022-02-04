@@ -2,8 +2,7 @@ mod util;
 use util::*;
 
 use async_trait::async_trait;
-use mcpe_protocol::mcpe::{ClientToServerHandshake, Login, Packet, PacketId};
-use serde_json::Value;
+use mcpe_protocol::mcpe::{ClientToServerHandshake, Login, Packet, PacketId, version_within_current_minor, PlayStatus, CURRENT_MAJOR};
 
 use crate::player::Player;
 
@@ -14,6 +13,7 @@ pub enum LoginHandlerError {
     Known(String),
     InvalidChain,
     InvalidClientData,
+	BrokenSignature,
     ProcessError(ProcessedLogin),
 }
 
@@ -53,6 +53,9 @@ impl PlayerLoginData {
 pub struct ProcessedLogin {
     /// The data relating to the player attempting to login
     pub data: PlayerLoginData,
+	/// The skin data of the player
+	/// At this stage, this is Base64 encoded
+	pub skin_data: String,
     /// Whether or not the login was signed by mojang (XBL)
     pub authorized: bool,
     /// Whether or not the signature is broken
@@ -69,9 +72,31 @@ impl PlayerHandler for LoginHandler {
         player: &mut Player,
         packet: mcpe_protocol::mcpe::Packet,
     ) -> Result<bool, super::HandlerError> {
+		let login_packet: Login = packet.kind.clone().into();
         let login = decode(packet.kind.into())?;
 
-        return Ok(true);
+		if login.verified != true {
+			return Err(LoginHandlerError::BrokenSignature.into());
+		}
+
+		// this second true represent whether or not auth is enabled.
+		// this is a to-do
+		if login.authorized != true && true {
+			player.disconnect("You must be logged in with your Xbox account to play on this server.").await;
+			return Ok(false);
+		}
+
+		if version_within_current_minor(login_packet.protocol) {
+        	return Ok(true);
+		} else if login_packet.protocol < CURRENT_MAJOR {
+			player.send(PlayStatus::FailedClient, true);
+			player.disconnect("Outdated client");
+			return Ok(false);
+		} else {
+			player.send(PlayStatus::FailedServer, true);
+			player.disconnect("Outdated server");
+			return Ok(false);
+		}
     }
 }
 
