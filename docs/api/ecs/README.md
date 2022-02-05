@@ -3,11 +3,13 @@ Netrex uses an entity component system to manage entities within worlds. This al
 the **Entity Component System** and how it's used within Netrex. If you're looking for how Entities are implemented within a world, visit the [Worlds](/worlds/README.md) documentation.
 
 ## How it works?
-Netrex takes a huge inspiration from the [Entity Component System](https://en.wikipedia.org/wiki/Entity_component_system) and uses it to create a powerful, dynamic API.
+Netrex takes a huge inspiration from the [Entity Component System](https://en.wikipedia.org/wiki/Entity_component_system) design and uses it to create a powerful, dynamic API.
 
-Entities are composed of components, each component being a implementation of the `Component` trait. This allows all entities to be dynamic and modified at any point.
-For example, imagine we want a `Player` entity to have infinite health because they are now in spectator mode; We can simple just register the `InfiniteHealth` component to the player,
-and now that player will have inifinite health until we remove that component.
+The main concept with a **Entity Component Sytem** is that Entities are composed of components; each component being a implementation of the `Component` trait, and as such, does not need
+to be implemented for every entity. This allows all entities to be dynamic and modified at any point. 
+
+For example, imagine we want a `Player` entity to have infinite health because they are now in spectator mode; We can simple just register an `InfiniteHealth` component to the player, and now that player will have inifinite health until we remove that component.
+One question that arises is how do we differentiate a `Player` entity from a `Mob` or something? Simple! We check if the entity has a `Player` component.
 
 This design allows us to be flexible in that not every entity needs to share the same components, remaining implicit while still being explicit.
 
@@ -88,9 +90,8 @@ fn move_once() {
 		let system = world.get_system::<PositionSystem>().unwrap();
 
 		for entity in world.get_entities().iter_mut() {
-			let mut to = entity.get_component::<Position>()?.clone();
-			to.y += 1.0;
-			system.update_entity(entity, to, &mut entity);
+			let mut to = Position::new(1, 1, 1);
+			system.update_entity(to, &mut entity);
 		}
 	}
 }

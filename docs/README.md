@@ -9,4 +9,6 @@
      </p>
 </div>
 
- - [Entity Component System](api/ecs/README.md)
+## Documentation
+ - [Installation](installation.md)
+ - [Api Documentation](api/README.md)
