@@ -12,6 +12,7 @@ pub struct SkinDataJwt {
     pub skin_id: VarString,
     /// PlayFabID, if available, is a market place company name.
     pub playfab_id: VarString,
+	/// The skin data
     pub resource_patch: ByteArray<u32>,
     pub image: SkinImage,
     pub animations: HashSet<SkinAnimation>,
