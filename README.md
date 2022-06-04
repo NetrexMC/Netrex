@@ -19,3 +19,9 @@ To view documentation [click here](https://netrexmc.github.io/Netrex/).
 #### The Game Plan
 
 We have a plan for the initial release! View it on our [projects page](https://github.com/NetrexMC/Netrex/projects/1)!
+
+# Libraries
+This directory consists of the libraries used for NetrexMC.
+
+- [`mc_flate2`](./mc_flate2/README.md)
+- 

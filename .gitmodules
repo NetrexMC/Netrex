@@ -1,0 +1,3 @@
+[submodule "mc-flate2"]
+	path = mc-flate2
+	url = https://github.com/NetrexMC/mc-flate2.git
