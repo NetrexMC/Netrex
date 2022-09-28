@@ -8,7 +8,7 @@ edition = "2021"
 
 [dependencies]
 # Hard depend on binary_utils
-binary_utils = { git = "https://github.com/NetrexMC/BinaryUtil", tag = "v0.2.2" }
+binary_utils = { git = "https://github.com/NetrexMC/BinaryUtil", tag = "v0.2.2", version = "0.2.2" }
 flate2 = { version = "1.0.22", features = ["zlib"], default-features = false }
 rakrs = { git = "https://github.com/NetrexMC/RakNet", tag = "v0.3.0-rc.2", features = ["mcpe"] }
 # rakrs = { path = "./rakrs", features = ["mcpe", "debug"] } # doing this to save commits, and to make it easier to test
@@ -28,3 +28,4 @@ futures-executor = "0.3.19"
 console-subscriber = "0.1.0"
 sha2 = "0.10.1"
 hmac = "0.12.0"
+readonly = "0.2.0"
