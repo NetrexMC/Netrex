@@ -1,3 +1,6 @@
+# Nuke mac bs
+.DS_Store
+
 # Miscellanious
 .tests
 dlts
