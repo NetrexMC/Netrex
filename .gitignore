@@ -1,26 +1,17 @@
+# Nuke mac bs
+.DS_Store
+
 # Miscellanious
 .tests
 dlts
 rakrs
 
-# Added by cargo
+# Added by Cargo
 target
 Cargo.lock
 
-# Added by logger
+# Added by Logger
 server.log
 
-# added by debugger
+# added by Debugger
 *.debug
-
-# tests that enable superflat and chunk loading
-src/network/chunk
-src/network/handler/game
-src/network/handler/encrypt
-src/world/biomes
-src/world/populators
-src/world/storage
-src/world/generator
-src/world/blocks
-src/world/chunk
-src/world/manager.rs
