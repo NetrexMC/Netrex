@@ -12,4 +12,4 @@ private = true
 [dependencies]
 # async-std = { version = "1.10.0", features = [ "unstable", "attributes" ] }
 tokio = { version = "1.15.0", features = ["full"] }
-rak-rs = { git = "https://github.com/NetrexMC/RakNet", branch = "v3", features = [ "mcpe", "async_tokio" ], default-features = false }
+rak-rs = { version="0.3.1", features = [ "mcpe", "async_tokio" ], default-features = false }
