@@ -3,38 +3,38 @@ pub mod console;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum Color {
-	Black = 0,
-	DarkGray,
-	Gray,
-	White,
-	DarkPurple,
-	LightPurple,
-	Blue,
-	DarkBlue,
-	DarkAqua,
-	Aqua,
-	Green,
-	DarkGreen,
-	Yellow,
-	Gold,
-	Red,
-	DarkRed,
-	MinecoinGold,
-	MaterialQuartz,
-	MaterialIron,
-	MaterialNetherite,
-	MaterialRedstone,
-	MaterialCopper,
-	MaterialGold,
-	MaterialEmerald,
-	MaterialDiamond,
-	MaterialLapis,
-	MaterialAmethyst
+    Black = 0,
+    DarkGray,
+    Gray,
+    White,
+    DarkPurple,
+    LightPurple,
+    Blue,
+    DarkBlue,
+    DarkAqua,
+    Aqua,
+    Green,
+    DarkGreen,
+    Yellow,
+    Gold,
+    Red,
+    DarkRed,
+    MinecoinGold,
+    MaterialQuartz,
+    MaterialIron,
+    MaterialNetherite,
+    MaterialRedstone,
+    MaterialCopper,
+    MaterialGold,
+    MaterialEmerald,
+    MaterialDiamond,
+    MaterialLapis,
+    MaterialAmethyst,
 }
 
 impl Color {
-	pub fn to_ansi(&self) -> &str {
-		match *self {
+    pub fn to_ansi(&self) -> &str {
+        match *self {
             Color::Black => "\\e[0;30m",
             Color::DarkBlue => "\\e[0;34m",
             Color::DarkGreen => "\\e[0;32m",
@@ -61,8 +61,7 @@ impl Color {
             Color::MaterialEmerald => "\033[38;2;17;160;54m",
             Color::MaterialDiamond => "\033[38;2;44;186;168m",
             Color::MaterialLapis => "\033[38;2;33;73;123m",
-            Color::MaterialAmethyst => "\033[38;2;154;92;198m"
-		}
-	}
+            Color::MaterialAmethyst => "\033[38;2;154;92;198m",
+        }
+    }
 }
-

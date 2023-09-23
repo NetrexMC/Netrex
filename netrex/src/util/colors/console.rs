@@ -1,9 +1,9 @@
 #[allow(unused_macros)]
 #[macro_export]
 macro_rules! ansii_format {
-	($color: expr, $terminator: expr, $t: expr) => {
-		format!("{}{}{}", $color, $t, $terminator)
-	};
+    ($color: expr, $terminator: expr, $t: expr) => {
+        format!("{}{}{}", $color, $t, $terminator)
+    };
 }
 
 #[macro_export]
