@@ -1,0 +1,6 @@
+[workspace]
+members = [
+	"netrex",
+	"netrex-ecs",
+	# "netrex-core" hidden for now
+]

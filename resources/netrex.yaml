@@ -1,0 +1,72 @@
+# The mode specifies how netrex will run.
+# (ignore this for now)
+#
+# Allowed Values:
+#   vanilla: Run as a netrex server, but enable vanilla features
+#   realm: Ignores all netrex features and runs as a realm server
+#
+# Running in realm mode will DISABLE ALL netrex features like:
+#   - Console
+#   - RCON
+#   - Plugins
+mode: vanilla
+
+# Whether or not to use the server.properties file
+# If redeclared in netrex.yaml, the values in server.properties will be ignored.
+use_server_properties: true
+
+# The network section specifies how netrex will listen for connections.
+network:
+  # Raknet Specific Settings
+  # If this is not provided the default settings will be used:
+  #   secure: false
+  #   max_channels: 1
+  #   max_connections: 100
+  raknet:
+    # This specifications follows RakNet protocol 9+ (MCPE)
+    # Whether or not to use secure connections
+    # Allowed Values: [true, false]
+    secure: false
+    # The maximum number of ordered channels allowed
+    # Allowed Values: 0-255
+    max_channels: 1
+    # The maximum number of connections allowed
+    # Allowed Values: any positive integer
+    max_connections: 100
+
+  # The port to listen on for IPv4 connections
+  # Allowed Values: 0-65535
+  port: 19132
+  # The port to listen on for IPv6 connections
+  # Allowed Values: 0-65535
+  port_v6: 19133
+
+  # Whether or not to host the server to the world.
+  # If this is set to false, the server will only be accessible
+  # from the local machine.
+  # Allowed Values: [true, false]
+  host: true
+
+  # These are compression related settings for the network.
+  compression:
+    # Whether or not to use compression
+    # Allowed Values: [true, false]
+    enabled: true
+    # The threshold for compression
+    # Allowed Values: 0-65535
+    threshold: 256
+    # The level of compression to use
+    # Determines how small the packets will be when sent to the client.
+    # If the value is too large the tradeoff will be slow decompress timings,
+    # but smaller packets, which will increase latency.
+    #
+    # General rule of thumb:
+    # Smaller = faster, but more bandwidth.
+    # Larger = slower, but less bandwidth.
+    #
+    # Allowed Values: 0-65535
+    level: 7
+
+  # The maximum MTU size to use for the network.
+  # Default: 1492
+  # Allowed Values: 0-65535
