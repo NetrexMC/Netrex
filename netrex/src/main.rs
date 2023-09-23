@@ -1,19 +1,18 @@
-use rak_rs::server::Listener;
+pub mod log;
+pub mod config;
+pub mod network;
+pub mod player;
+pub mod plugin;
+pub mod server;
+pub mod util;
 
-mod network;
-mod player;
-mod plugin;
-mod server;
+use crate::log::Loggable;
 
 #[tokio::main]
 async fn main() {
-	// load network layer
-	let mut server = Listener::bind("0.0.0.0:19132").await.unwrap();
+	let logger = log::colored_logger::ColoredLogger::default();
 
-	server.start().await.unwrap();
-
-	loop {
-		let conn = server.accept().await.unwrap();
-		println!("New connection from {}", conn.address);
-	}
+	logger.info("Starting Netrex...");
+	logger.info("Loading config...");
+	logger.error("Failed to load config!");
 }

@@ -13,3 +13,5 @@ private = true
 # async-std = { version = "1.10.0", features = [ "unstable", "attributes" ] }
 tokio = { version = "1.15.0", features = ["full"] }
 rak-rs = { version="0.3.1", features = [ "mcpe", "async_tokio" ], default-features = false }
+serde = { version = "1.0.187", features = ["derive"] }
+serde_yaml = "0.9.25"

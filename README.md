@@ -11,7 +11,7 @@
 
 # Netrex
 
-Netrex aim's to be a fast, multi-threaded MC:BE software written in rust.
+Netrex aim's to be a fast, async, multi-threaded MC:BE software written in rust.
 
 To view documentation [click here](https://netrexmc.github.io/Netrex/).
 
